@@ -12,6 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraft.network.chat.Component;
 import com.lockon.camera.CameraStateManager;
+import net.minecraftforge.client.event.ScreenEvent;
 
 
 import java.lang.reflect.Field;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 public class LockTickHandler {
 
     private static final Minecraft mc = Minecraft.getInstance();
+
 
     private static double originalMouseSensitivity = -1.0;
 
@@ -134,7 +136,7 @@ public class LockTickHandler {
         if (event.phase != TickEvent.Phase.START) return;
         if (mc.player == null || mc.level == null) return;
 
-        // ... (metodun geri kalanı aynı)
+
         boolean isCurrentlyLocked = LockState.isLocked();
 
         // Target Scan Frequency kontrolü
@@ -212,4 +214,17 @@ public class LockTickHandler {
             }
         }
     }
+
+
+    @SubscribeEvent
+    public static void onScreenOpening(ScreenEvent.Opening event) {
+        if (LockState.isLocked()) {
+            // kilidi ve hassasiyeti sıfırlar
+            LockState.unlock();
+            CameraStateManager.onUnlock(mc);
+            lastUnlockTime = System.currentTimeMillis();
+
+        }
+    }
+
 }

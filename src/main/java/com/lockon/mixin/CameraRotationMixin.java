@@ -17,21 +17,17 @@ public abstract class CameraRotationMixin {
 
     @Inject(method = "setRotation", at = @At("HEAD"), cancellable = true)
     private void lockon$smoothRotation(float yaw, float pitch, CallbackInfo ci) {
-        if (CameraStateManager.lockedTarget != null && CameraStateManager.cameraMode == 1) {
-            Minecraft mc = Minecraft.getInstance();
+        Minecraft mc = Minecraft.getInstance();
 
-            // mc.getFrameTime() bazen hatalı dönebilir.
-            // Mixin'in kendi içindeki parametreyi değil, render anındaki gerçek zamanı gönderir.
+        // YENİ ŞART: Hedef olacak VE Omuz kamerası gerçekten aktif olacak
+        if (CameraStateManager.lockedTarget != null && CameraStateManager.isShoulderCamActuallyActive(mc)) {
             float partialTick = mc.getFrameTime();
-
-            // Kamerayı güncelle
             CameraStateManager.updateCameraFPS(mc, partialTick);
 
-            // Değerleri zorla yaz
             this.yRot = CameraStateManager.finalYaw;
             this.xRot = CameraStateManager.finalPitch;
 
-            ci.cancel(); // Minecraft'ın kendi titrek hesaplamasını iptal et
+            ci.cancel();
         }
     }
 }

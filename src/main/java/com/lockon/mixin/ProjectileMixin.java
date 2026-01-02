@@ -16,10 +16,10 @@ public abstract class ProjectileMixin {
     @Inject(method = "shoot(DDDFF)V", at = @At("HEAD"), cancellable = true)
     private void lockon$redirectShoot(double x, double y, double z, float velocity, float inaccuracy, CallbackInfo ci) {
         // Kilitlenme KAPALI ve Omuz Kamerası AÇIK iken mermiyi düzelt
-        if (!LockState.isLocked() && CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {
+        if (!LockState.isLocked() && CameraViewConfig.ENABLE_SHOULDER_CAM.get() && CameraViewConfig.CLIENT.enableParallaxAssist.get()){
 
             Vec3 target = CrosshairTargetHelper.getCrosshairTarget(128.0);
-            // Artık getMuzzlePosition hata vermeyecektir
+
             Vec3 source = CrosshairTargetHelper.getMuzzlePosition();
 
             if (target != null && source != null) {

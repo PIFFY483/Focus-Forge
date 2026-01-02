@@ -14,16 +14,8 @@ public class LockOnConfig {
     public static final ForgeConfigSpec CLIENT_SPEC;
     public static final Client CLIENT;
 
-    // --- ENUM: Görsel Stil ---
-    public enum VisualStyle {
-        OFF,
-        CROSSHAIR,
-        BOX
-    }
-    // -------------------------
 
     // Statik alanlar (Ayarların dışarıdan erişileceği yer)
-    public static final ForgeConfigSpec.EnumValue<VisualStyle> VISUAL_STYLE;
     public static final ForgeConfigSpec.BooleanValue ENABLE_MOUSE_INPUT_WARNING;
 
     // Lock Mekanizması
@@ -50,12 +42,10 @@ public class LockOnConfig {
     public static final ForgeConfigSpec.BooleanValue BREAK_LOCK_ON_LOS_BREAK;
 
     // --- CROSSHAIR/BOX AYARLARI ---
-    public static final ForgeConfigSpec.DoubleValue CROSSHAIR_Y_OFFSET;
+
     public static final ForgeConfigSpec.DoubleValue CROSSHAIR_XZ_SIZE;
     public static final ForgeConfigSpec.DoubleValue CROSSHAIR_Y_SIZE;
-    public static final ForgeConfigSpec.IntValue CROSSHAIR_R;
-    public static final ForgeConfigSpec.IntValue CROSSHAIR_G;
-    public static final ForgeConfigSpec.IntValue CROSSHAIR_B;
+
     // --------------------------------------------
 
     // Block Lists
@@ -68,7 +58,7 @@ public class LockOnConfig {
         CLIENT = specPair.getLeft();
 
         // Config'ten statik alanlara atama
-        VISUAL_STYLE = CLIENT.visualStyle;
+
         ENABLE_MOUSE_INPUT_WARNING = CLIENT.enableMouseInputWarning;
         LOCK_SPEED = CLIENT.lockSpeed;
         MAX_SMOOTHING_FACTOR = CLIENT.maxSmoothingFactor;
@@ -93,12 +83,10 @@ public class LockOnConfig {
         BREAK_LOCK_ON_LOS_BREAK = CLIENT.breakLockOnLosBreak;
 
         // Crosshair Ayarlarının Ataması
-        CROSSHAIR_Y_OFFSET = CLIENT.crosshairYOffset;
+
         CROSSHAIR_XZ_SIZE = CLIENT.crosshairXZSize;
         CROSSHAIR_Y_SIZE = CLIENT.crosshairYSize;
-        CROSSHAIR_R = CLIENT.crosshairR;
-        CROSSHAIR_G = CLIENT.crosshairG;
-        CROSSHAIR_B = CLIENT.crosshairB;
+
 
         // Block List Atamaları
         lockPreclusionBlockList = CLIENT.lockPreclusionBlockList;
@@ -107,7 +95,6 @@ public class LockOnConfig {
 
     public static class Client {
 
-        public final ForgeConfigSpec.EnumValue<VisualStyle> visualStyle;
         public final ForgeConfigSpec.BooleanValue enableMouseInputWarning;
 
         // Lock Mekanizması
@@ -133,13 +120,11 @@ public class LockOnConfig {
         public final ForgeConfigSpec.DoubleValue maxLockAngle;
         public final ForgeConfigSpec.BooleanValue breakLockOnLosBreak;
 
-        // Crosshair/Box Config Alanları
-        public final ForgeConfigSpec.DoubleValue crosshairYOffset;
+        // icon Config Alanları
+
         public final ForgeConfigSpec.DoubleValue crosshairXZSize;
         public final ForgeConfigSpec.DoubleValue crosshairYSize;
-        public final ForgeConfigSpec.IntValue crosshairR;
-        public final ForgeConfigSpec.IntValue crosshairG;
-        public final ForgeConfigSpec.IntValue crosshairB;
+
 
         // Block Lists
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> lockPreclusionBlockList;
@@ -147,23 +132,16 @@ public class LockOnConfig {
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.push("Visuals");
-            this.visualStyle = builder.comment("Kilitlenme sırasında görsel stili seçer: OFF, CROSSHAIR (İmleç), BOX (Hedefin etrafındaki kutu).")
-                    .defineEnum("visualStyle", VisualStyle.CROSSHAIR);
+
             this.enableMouseInputWarning = builder.comment("Kilitlenme sırasında fare girişinin geçersiz kılındığı konusunda bir uyarı gösterir.")
                     .define("enableMouseInputWarning", true);
 
-            this.crosshairYOffset = builder.comment("Kilitlenme hedefine göre Dikey Ofset (blok). 0.0, hedef varlığın göz hizasına odaklanır.")
-                    .defineInRange("crosshairYOffset", 0.0, -1.0, 5.0);
+
             this.crosshairXZSize = builder.comment("Hedef Kutunun Yatay Boyutu (X ve Z ekseni).")
                     .defineInRange("crosshairXZSize", 0.5, 0.1, 5.0);
             this.crosshairYSize = builder.comment("Hedef Kutunun Dikey Boyutu (Y ekseni).")
                     .defineInRange("crosshairYSize", 1.0, 0.1, 5.0);
-            this.crosshairR = builder.comment("Hedef Kutunun Kırmızı (R) bileşeni (0-255).")
-                    .defineInRange("crosshairR", 255, 0, 255);
-            this.crosshairG = builder.comment("Hedef Kutunun Yeşil (G) bileşeni (0-255).")
-                    .defineInRange("crosshairG", 0, 0, 255);
-            this.crosshairB = builder.comment("Hedef Kutunun Mavi (B) bileşeni (0-255).")
-                    .defineInRange("crosshairB", 0, 0, 255);
+
             builder.pop();
 
             builder.push("LockMechanism");

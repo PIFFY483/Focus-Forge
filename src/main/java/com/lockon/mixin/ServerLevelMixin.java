@@ -15,6 +15,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static com.lockon.util.SoundFixer.playLaunchSound;
+
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin {
 
@@ -26,12 +28,12 @@ public abstract class ServerLevelMixin {
         if (lockon$isProcessing) return;
 
         if (!(entity instanceof Projectile original) || !(original.getOwner() instanceof Player player)) return;
-        if (LockState.isLocked() || !CameraViewConfig.ENABLE_SHOULDER_CAM.get()) return;
+        if (LockState.isLocked() || !CameraViewConfig.ENABLE_SHOULDER_CAM.get() || !CameraViewConfig.CLIENT.enableParallaxAssist.get()) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.getCameraType().isFirstPerson()) return;
 
-        // 1. HEDEFİ BUL (Crosshair'ın dünyada değdiği nokta)
+        // 1. HEDEFİ BUL (Crosshair ın dünyada değdiği nokta)
         Vec3 targetPoint = CrosshairTargetHelper.getCrosshairTarget(128.0);
         if (targetPoint == null) return;
 
@@ -66,6 +68,7 @@ public abstract class ServerLevelMixin {
                 if (speed < 0.1) speed = 1.5;
 
                 newProjectile.shoot(direction.x, direction.y, direction.z, (float) speed, 0.0F);
+                playLaunchSound(player, entity);
 
                 player.level().addFreshEntity(newProjectile);
                 cir.setReturnValue(true);

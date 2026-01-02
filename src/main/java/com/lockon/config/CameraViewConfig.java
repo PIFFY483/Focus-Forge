@@ -9,6 +9,17 @@ public class CameraViewConfig {
     public static final ForgeConfigSpec SPEC;
     public static final Client CLIENT;
 
+    public enum VisualStyle {
+        OFF,
+        CROSSHAIR,
+        STAR,
+        HEXAGON,
+        VANGUARD,
+        TRINITY,
+        HUNTER,
+        CHRONOS
+    }
+
     // Static variables for easy access
     public static final ForgeConfigSpec.DoubleValue SHOULDER_OFFSET_X;
     public static final ForgeConfigSpec.DoubleValue SHOULDER_OFFSET_Y;
@@ -18,6 +29,9 @@ public class CameraViewConfig {
     public static final ForgeConfigSpec.IntValue CROSSHAIR_MODE;
     public static final ForgeConfigSpec.IntValue CROSSHAIR_STYLE;
     public static final ForgeConfigSpec.IntValue CROSSHAIR_COLOR_INDEX;
+    public static final ForgeConfigSpec.DoubleValue FOCUS_OFFSET_Y;
+    // Dinamik Odak Oranı (Varsayılan %70 -> 0.7)
+    public static final ForgeConfigSpec.DoubleValue DYNAMIC_FOCUS_THRESHOLD;
 
     static {
         Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
@@ -33,6 +47,8 @@ public class CameraViewConfig {
         CROSSHAIR_MODE = CLIENT.crosshairMode;
         CROSSHAIR_STYLE = CLIENT.crosshairStyle;
         CROSSHAIR_COLOR_INDEX = CLIENT.crosshairColorIndex;
+        FOCUS_OFFSET_Y = CLIENT.focusOffsetY;
+        DYNAMIC_FOCUS_THRESHOLD = CLIENT.dynamicFocusHeightRatio;
     }
 
     public static class Client {
@@ -48,6 +64,11 @@ public class CameraViewConfig {
         public final ForgeConfigSpec.BooleanValue enableVignette;
         public final ForgeConfigSpec.IntValue crosshairStyle;
         public final ForgeConfigSpec.IntValue crosshairColorIndex;
+        public final ForgeConfigSpec.DoubleValue focusOffsetY;
+        public final ForgeConfigSpec.DoubleValue dynamicFocusHeightRatio;
+        public final ForgeConfigSpec.EnumValue<CameraViewConfig.VisualStyle> visualStyle;
+        public final ForgeConfigSpec.DoubleValue iconYOffset;
+        public final ForgeConfigSpec.BooleanValue enableParallaxAssist;
 
 
 
@@ -68,7 +89,7 @@ public class CameraViewConfig {
 
             this.cameraSmoothness = builder
                     .comment("Camera movement smoothness (0.1: Very Slow, 1.0: Rigid)")
-                    .defineInRange("cameraSmoothness", 0.4, 0.05, 1.0);
+                    .defineInRange("cameraSmoothness", 0.1, 0.05, 1.0);
 
             this.enableShoulderCam = builder
                     .comment("Enable or disable the shoulder camera system")
@@ -78,7 +99,7 @@ public class CameraViewConfig {
 
             this.lockOnSmoothness = builder
                     .comment("Target tracking smoothness during lock-on (0.001: Very Fluid, 0.60: Very Rigid)")
-                    .defineInRange("lockOnSmoothness", 0.10, 0.001, 0.60);
+                    .defineInRange("lockOnSmoothness", 0.10, 0.001, 0.125);
 
             this.zoomInSpeed = builder
                     .comment("Speed of the zoom effect (0.01: Very Slow, 1.0: Instant)")
@@ -101,6 +122,26 @@ public class CameraViewConfig {
             this.crosshairColorIndex = builder
                     .comment("0: Turquoise, 1: Green, 2: Dark Blue, 3: Red, 4: White,") // Renkleri güncelledik
                     .defineInRange("crosshairColorIndex", 0, 0, 4);
+
+            this.focusOffsetY = builder
+                    .comment("Kamera odak noktasının dikey (Y) kaydırması.")
+                    .defineInRange("focusOffsetY", 0.0, -5.0, 5.0);
+
+            this.dynamicFocusHeightRatio = builder
+                    .comment("2 bloktan büyük moblar için odak yüksekliği oranı (0.7 = %70)")
+                    .defineInRange("dynamicFocusHeightRatio", 0.7, 0.1, 1.0);
+
+            this.visualStyle = builder
+                    .comment("İkon stili: OFF (Kapalı), CROSSHAIR (Elmas), BOX (Kutu), HEXAGON (Altıgen), VANGUARD (Köşeli)")
+                    .defineEnum("visualStyle", CameraViewConfig.VisualStyle.CROSSHAIR);
+
+            this.iconYOffset = builder
+                    .comment("İkonun, odak noktasından ne kadar yukarıda/aşağıda duracağı.")
+                    .defineInRange("iconYOffset", 0.0, -2.0, 2.0);
+
+            this.enableParallaxAssist = builder
+                    .comment("Omuz kamerasındayken atış sapmasını düzelten parallax asistini açar/kapatır.")
+                    .define("enableParallaxAssist", true);
             builder.pop();
         }
     }

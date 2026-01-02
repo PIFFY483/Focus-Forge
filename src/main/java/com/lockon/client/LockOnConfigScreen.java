@@ -1,7 +1,6 @@
 package com.lockon.client;
 
 import com.lockon.config.LockOnConfig;
-import com.lockon.config.LockOnConfig.VisualStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -36,14 +35,10 @@ public class LockOnConfigScreen extends Screen {
     private int xCol4;
 
     // --- TEMPORARY LOCK SETTINGS ---
-    private VisualStyle tempVisualStyle;
     private boolean tempEnableMouseInputWarning;
-    private double tempCrosshairYOffset;
     private double tempCrosshairXZSize;
     private double tempCrosshairYSize;
-    private int tempCrosshairR;
-    private int tempCrosshairG;
-    private int tempCrosshairB;
+
 
     private double tempLockSpeed;
     private double tempMaxSmoothingFactor;
@@ -70,14 +65,11 @@ public class LockOnConfigScreen extends Screen {
     }
 
     private void loadCurrentConfig() {
-        this.tempVisualStyle = LockOnConfig.VISUAL_STYLE.get();
+
         this.tempEnableMouseInputWarning = LockOnConfig.ENABLE_MOUSE_INPUT_WARNING.get();
-        this.tempCrosshairYOffset = LockOnConfig.CROSSHAIR_Y_OFFSET.get();
+
         this.tempCrosshairXZSize = LockOnConfig.CROSSHAIR_XZ_SIZE.get();
         this.tempCrosshairYSize = LockOnConfig.CROSSHAIR_Y_SIZE.get();
-        this.tempCrosshairR = LockOnConfig.CROSSHAIR_R.get();
-        this.tempCrosshairG = LockOnConfig.CROSSHAIR_G.get();
-        this.tempCrosshairB = LockOnConfig.CROSSHAIR_B.get();
         this.tempLockSpeed = LockOnConfig.LOCK_SPEED.get();
         this.tempMaxSmoothingFactor = LockOnConfig.MAX_SMOOTHING_FACTOR.get();
         this.tempMaxLockDistance = LockOnConfig.MAX_LOCK_DISTANCE.get();
@@ -97,7 +89,6 @@ public class LockOnConfigScreen extends Screen {
 
     @Override
     protected void init() {
-        // 4 Sütun Konumları: Ekranı ortalayacak şekilde hesaplandı
         int totalWidth = 4 * BUTTON_WIDTH + 3 * COL_GAP;
         this.xCol1 = (this.width - totalWidth) / 2;
         this.xCol2 = this.xCol1 + BUTTON_WIDTH + COL_GAP;
@@ -112,7 +103,12 @@ public class LockOnConfigScreen extends Screen {
             this.initMainSettings();
         }
 
-        // GLOBAL BUTON: Sadece DONE (Listeler ana akışa taşındığı için)
+
+        this.addRenderableWidget(new IntSlider(xCol4, 40, BUTTON_WIDTH, "ICON SIZE", (int)(LockOnConfig.CROSSHAIR_XZ_SIZE.get() * 100), 10, 500, (val) -> {
+            LockOnConfig.CROSSHAIR_XZ_SIZE.set(val / 100.0);
+        }));
+
+        // DONE BUTONU
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
             this.onClose();
         }).bounds(this.width / 2 - 100, this.height - 29, 200, BUTTON_HEIGHT).build());
@@ -216,46 +212,27 @@ public class LockOnConfigScreen extends Screen {
 
         // Visuals Title
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.title.visuals")));
-        y += ROW_HEIGHT;
+        y += ROW_HEIGHT + 10; // Başlıktan sonra biraz daha fazla boşluk
 
-        // Row 1: 4 Options
-        this.addRenderableWidget(CycleButton.<VisualStyle>builder(style -> Component.literal(style.name())) // Style adını göster
-                .withValues(VisualStyle.values())
-                .withInitialValue(this.tempVisualStyle)
-                .create(this.xCol1, y, BUTTON_WIDTH, BUTTON_HEIGHT, getShortKeyComponent("lockon.config.visual_style"), (b, v) -> this.tempVisualStyle = v));
+        // Row 1: Temel Görsel Uyarılar ve Boyut
+        this.addRenderableWidget(this.createShortCycleButton(this.xCol1, y, "lockon.config.mouse_warning", this.tempEnableMouseInputWarning, (v) -> this.tempEnableMouseInputWarning = v));
 
-        this.addRenderableWidget(this.createShortCycleButton(this.xCol2, y, "lockon.config.mouse_warning", this.tempEnableMouseInputWarning, (v) -> this.tempEnableMouseInputWarning = v));
+        // ICON SIZE (XZ) - xCol2
+        this.addRenderableWidget(new FloatSlider(this.xCol2, y, BUTTON_WIDTH, "ICON SIZE XZ", this.tempCrosshairXZSize, 0.1, 5.0, 1, (v) -> this.tempCrosshairXZSize = v));
 
-        this.addRenderableWidget(new FloatSlider(this.xCol3, y, BUTTON_WIDTH, "lockon.config.crosshair_y_offset", this.tempCrosshairYOffset, -1.0, 5.0, 2, (v) -> this.tempCrosshairYOffset = v));
-        this.addRenderableWidget(new FloatSlider(this.xCol4, y, BUTTON_WIDTH, "lockon.config.crosshair_xz_size", this.tempCrosshairXZSize, 0.1, 5.0, 1, (v) -> this.tempCrosshairXZSize = v));
-        y += ROW_HEIGHT;
+        // ICON Y SIZE - xCol3
+        this.addRenderableWidget(new FloatSlider(this.xCol3, y, BUTTON_WIDTH, "ICON SIZE Y", this.tempCrosshairYSize, 0.1, 5.0, 1, (v) -> this.tempCrosshairYSize = v));
 
-        // Row 2: 1 Option
-        this.addRenderableWidget(new FloatSlider(this.xCol1, y, BUTTON_WIDTH, "lockon.config.crosshair_y_size", this.tempCrosshairYSize, 0.1, 5.0, 1, (v) -> this.tempCrosshairYSize = v));
-        y += ROW_HEIGHT;
+        y += ROW_HEIGHT + 20; // Alt bölüme geçmeden önce belirgin boşluk
 
-        y += 10;
 
-        // Color Title
-        this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.title.color")));
-        y += ROW_HEIGHT;
-
-        // Row 3: 3 Options
-        this.addRenderableWidget(new ColorSlider(this.xCol1, y, BUTTON_WIDTH, "lockon.config.crosshair_r", this.tempCrosshairR, (v) -> this.tempCrosshairR = v));
-        this.addRenderableWidget(new ColorSlider(this.xCol2, y, BUTTON_WIDTH, "lockon.config.crosshair_g", this.tempCrosshairG, (v) -> this.tempCrosshairG = v));
-        this.addRenderableWidget(new ColorSlider(this.xCol3, y, BUTTON_WIDTH, "lockon.config.crosshair_b", this.tempCrosshairB, (v) -> this.tempCrosshairB = v));
-        y += ROW_HEIGHT;
-
-        y += 10;
-
-        // Main Settings Toggle (2 Sütunluk yere ortalanmış)
+        // Main Settings Toggle (Alt kısma ortalanmış buton)
         int toggleButtonWidth = 2 * BUTTON_WIDTH + COL_GAP;
-        int toggleButtonX = (this.width / 2) - toggleButtonWidth / 2; // Ortadan başlat
+        int toggleButtonX = (this.width / 2) - toggleButtonWidth / 2;
         this.addRenderableWidget(Button.builder(Component.translatable("lockon.config.button.main_settings"), (button) -> {
             this.showVisualSettings = false;
             this.init(this.minecraft, this.width, this.height);
         }).bounds(toggleButtonX, y, toggleButtonWidth, BUTTON_HEIGHT).build());
-        y += ROW_HEIGHT;
     }
 
     // Yardımcı Metot: Key'den kısa, büyük harfli Component oluşturur
@@ -287,14 +264,10 @@ public class LockOnConfigScreen extends Screen {
     }
 
     private void saveConfig() {
-        LockOnConfig.VISUAL_STYLE.set(this.tempVisualStyle);
         LockOnConfig.ENABLE_MOUSE_INPUT_WARNING.set(this.tempEnableMouseInputWarning);
-        LockOnConfig.CROSSHAIR_Y_OFFSET.set(this.tempCrosshairYOffset);
+
         LockOnConfig.CROSSHAIR_XZ_SIZE.set(this.tempCrosshairXZSize);
         LockOnConfig.CROSSHAIR_Y_SIZE.set(this.tempCrosshairYSize);
-        LockOnConfig.CROSSHAIR_R.set(this.tempCrosshairR);
-        LockOnConfig.CROSSHAIR_G.set(this.tempCrosshairG);
-        LockOnConfig.CROSSHAIR_B.set(this.tempCrosshairB);
         LockOnConfig.LOCK_SPEED.set(this.tempLockSpeed);
         LockOnConfig.MAX_SMOOTHING_FACTOR.set(this.tempMaxSmoothingFactor);
         LockOnConfig.MAX_LOCK_DISTANCE.set(this.tempMaxLockDistance);

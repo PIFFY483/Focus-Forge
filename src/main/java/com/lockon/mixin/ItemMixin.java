@@ -24,7 +24,7 @@ public abstract class ItemMixin {
 
         Minecraft mc = Minecraft.getInstance();
         // Sadece omuz kamerasında ve kilitli değilken hedefi önceden hesaplar
-        if (CameraViewConfig.ENABLE_SHOULDER_CAM.get() && !LockState.isLocked() && !mc.options.getCameraType().isFirstPerson()) {
+        if (CameraViewConfig.ENABLE_SHOULDER_CAM.get() && !LockState.isLocked() && CameraViewConfig.CLIENT.enableParallaxAssist.get() && !mc.options.getCameraType().isFirstPerson()) {
             // Bu kısım CrosshairTargetHelper'ın güncel veriyi hazır tutmasını sağlar
             CrosshairTargetHelper.getCrosshairTarget(128.0);
         }

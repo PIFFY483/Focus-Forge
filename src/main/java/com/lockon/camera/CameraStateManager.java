@@ -16,6 +16,19 @@ public class CameraStateManager {
     private static int unlockTimer = 0;
     private static int alignmentTicks = 0;
 
+    public static boolean isShoulderCamActuallyActive(Minecraft mc) {
+        // 1. Ayarlardan omuz kamerası tamamen kapalı mı?
+        if (!CameraViewConfig.ENABLE_SHOULDER_CAM.get()) return false;
+
+        // 2. Oyuncu birinci şahıs (First Person) modunda mı?
+        // Minecraft'ta 0: First Person, 1: Third Person Back, 2: Third Person Front
+        // Omuz kamerası sadece Third Person modlarında çalışmalı (tercihen sadece 1)
+        if (mc.options.getCameraType().isFirstPerson()) return false;
+
+        // 3. Bizim omuz kamerası modu "Hidden" değilse (modeNames'teki 0. index)
+        return CameraStateManager.cameraMode > 0;
+    }
+
     public static float getSmoothness() {
         if (lockedTarget != null && cameraMode == 1) {
             return CameraViewConfig.CLIENT.lockOnSmoothness.get().floatValue();
@@ -53,9 +66,9 @@ public class CameraStateManager {
 
             // 2. ADIM: MOUSE SIFIRLAMA
             // Minecraft'ın farenin ne kadar döndüğünü hesapladığı o "birikmiş" veriyi temizliyoruz.
-            // Bazı sürümlerde mouseHandler.accumulatedDX/DY değişkenlerine erişemeyebilirsin,
+            // Bazı sürümlerde mouseHandler.accumulatedDX/DY değişkenlerine erişilemiyebilir,
             // bu yüzden en garanti yöntem fareyi anlık olarak "serbest bırakıp tekrar yakalamaktır"
-            // ya da oyuncunun dönme hızını (delta) sıfırlamaktır.
+            // ya da oyuncunun dönme hızını (delta) sıfırla.
 
             mc.mouseHandler.releaseMouse();
             mc.mouseHandler.grabMouse();
@@ -74,21 +87,19 @@ public class CameraStateManager {
         // 1. HEDEF KONTROLÜ
         Entity currentTarget = LockState.getTarget();
 
-        // DURUM A: Hedef az önce koptu (Temizler)
         if (currentTarget == null && lockedTarget != null && unlockTimer == 0) {
             onUnlock(mc);
-            return; // Temizliği yap ve bu kareyi atla
+            return;
         }
 
-        // DURUM B: Hedef hala var veya tampon süresi işliyor
         if (currentTarget != null) {
             lockedTarget = currentTarget;
-            unlockTimer = 5; // Hedef olduğu sürece süreyi tazele
+            unlockTimer = 5;
         } else {
             if (unlockTimer > 0) {
-                unlockTimer--; // Hedef yoksa ama süre bitmediyse geri say
+                unlockTimer--;
             } else {
-                lockedTarget = null; // Süre bittiyse tamamen bırak
+                lockedTarget = null;
             }
         }
 
@@ -106,30 +117,67 @@ public class CameraStateManager {
         // 3. EKSEN VE AÇI HESABI
         float targetYaw, targetPitch;
         if (lockedTarget != null && lockedTarget.isAlive() && cameraMode == 1) {
-            // PartialTick ile yumuşatılmış konumlar
             double targetX = Mth.lerp(partialTick, lockedTarget.xo, lockedTarget.getX());
-            double targetY = Mth.lerp(partialTick, lockedTarget.yo, lockedTarget.getY()) + lockedTarget.getEyeHeight() * 0.85;
             double targetZ = Mth.lerp(partialTick, lockedTarget.zo, lockedTarget.getZ());
 
+            double baseTargetY = Mth.lerp(partialTick, lockedTarget.yo, lockedTarget.getY());
+            double finalTargetY;
+            float entityHeight = lockedTarget.getBbHeight();
+
+            if (entityHeight > 2.0f) {
+                finalTargetY = baseTargetY + (entityHeight * CameraViewConfig.CLIENT.dynamicFocusHeightRatio.get());
+            } else {
+                finalTargetY = baseTargetY + lockedTarget.getEyeHeight();
+            }
+
+            finalTargetY += CameraViewConfig.CLIENT.focusOffsetY.get();
+
             double dx = targetX - mc.player.getX();
-            double dy = targetY - (mc.player.getY() + mc.player.getEyeHeight());
+            double dy = finalTargetY - (mc.player.getY() + mc.player.getEyeHeight());
             double dz = targetZ - mc.player.getZ();
 
             targetYaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0F);
             targetPitch = (float) (-Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
             targetPitch = Mth.clamp(targetPitch, -40.0F, 40.0F);
+
+            // --- YENİ SİNEMATİK TAKİP MANTIĞI BAŞLANIÇI ---
+            float currentLerp = getSmoothness();
+
+            // 1. Mesafe Freni: Mob 5 bloktan yakındaysa hızı mesafeye oranla %50'ye kadar düşürür
+            float distance = mc.player.distanceTo(lockedTarget);
+            if (distance < 5.0f) {
+                float distanceFactor = Mth.clamp(distance / 5.0f, 0.5f, 1.0f);
+                currentLerp *= distanceFactor;
+            }
+
+            // 2. Açısal Basamak (Stepping): Kare başına max dönüşü kısıtlar (Titremeyi bitiren ana nokta)
+            float yawDiff = Mth.wrapDegrees(targetYaw - finalYaw);
+            float pitchDiff = targetPitch - finalPitch;
+
+            // maxStep: Bir karede kameranın "atlayabileceği" maksimum derece.
+            // Bu değer yüksek senslerde sıçramayı (jitter) engeller.
+            float maxStep = 4.5f;
+
+            float stepYaw = Mth.clamp(yawDiff * currentLerp, -maxStep, maxStep);
+            float stepPitch = Mth.clamp(pitchDiff * currentLerp, -maxStep, maxStep);
+
+            finalYaw += stepYaw;
+            finalPitch += stepPitch;
+            // --- YENİ SİNEMATİK TAKİP MANTIĞI BİTİŞİ ---
+
         } else {
             targetYaw = mc.player.getYRot();
             targetPitch = mc.player.getXRot();
+
+            // Kilit yokken normal yumuşatma ile devam et
+            float currentLerp = getSmoothness();
+            finalYaw = Mth.rotLerp(currentLerp, finalYaw, targetYaw);
+            finalPitch = Mth.lerp(currentLerp, finalPitch, targetPitch);
         }
 
         // 4. UYGULAMA VE BLOKE
-        float currentLerp = getSmoothness();
-        finalYaw = Mth.rotLerp(currentLerp, finalYaw, targetYaw);
-        finalPitch = Mth.lerp(currentLerp, finalPitch, targetPitch);
-
         if (lockedTarget != null || unlockTimer > 0) {
-            // Minecraft'ı çaresiz bırakan vuruş:
+            finalYaw = Mth.wrapDegrees(finalYaw);
             applyAbsoluteForce(mc.player, finalYaw, finalPitch);
         }
     }

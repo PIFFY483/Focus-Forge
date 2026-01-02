@@ -60,7 +60,7 @@ public abstract class EntityMixin {
         }
 
         /* =========================
-           YAKIN DÖVÜŞ (SENİN AKILLI SİSTEM)
+           YAKIN DÖVÜŞ
            ========================= */
 
         double scanDistance = 5.0;

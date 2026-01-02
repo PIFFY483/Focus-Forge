@@ -4,16 +4,18 @@ import com.lockon.config.CameraViewConfig;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraftforge.common.ForgeConfigSpec;
+import com.lockon.config.CameraViewConfig.VisualStyle;
 
 import java.util.function.Consumer;
 
 public class CameraConfigScreen extends Screen {
 
-    // modeNames'i buraya alarak tüm sınıf için görünür kılıyoruz
+    // modeNames'i buraya alarak tüm sınıf için görünür kılar
     private static final String[] modeNames = {"Hidden", "Shoulder Only", "Always"};
 
     public CameraConfigScreen() {
@@ -43,6 +45,16 @@ public class CameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new FloatSlider(xLeft, y + (spacing * 3), width, "Smoothness", CameraViewConfig.CAMERA_SMOOTHNESS.get(), 0.05, 1.0, (val) -> {
             CameraViewConfig.CAMERA_SMOOTHNESS.set(val);
+        }));
+
+        this.addRenderableWidget(new FloatSlider(xLeft, y + (spacing * 5), width, "Focus Y Offset",
+                CameraViewConfig.CLIENT.focusOffsetY.get(), -2.0, 2.0, (val) -> {
+            CameraViewConfig.CLIENT.focusOffsetY.set(val);
+        }));
+
+        this.addRenderableWidget(new FloatSlider(xLeft, y + (spacing * 4), width, "Big Mob Focus %",
+                CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.get(), 0.1, 1.0, (val) -> {
+            CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.set(val);
         }));
 
         // --- RIGHT SIDE (Lock-On and Zoom Settings) ---
@@ -84,7 +96,7 @@ public class CameraConfigScreen extends Screen {
 
         // 5. Tracking Sensitivity
         this.addRenderableWidget(new FloatSlider(xRight, y + (spacing * 4), width, "Tracking Sens.",
-                CameraViewConfig.CLIENT.lockOnSmoothness.get(), 0.001, 0.60, (val) -> {
+                CameraViewConfig.CLIENT.lockOnSmoothness.get(), 0.001, 0.125, (val) -> {
             CameraViewConfig.CLIENT.lockOnSmoothness.set(val);
         }));
 
@@ -129,7 +141,27 @@ public class CameraConfigScreen extends Screen {
                             btn.setMessage(Component.literal("Color: " + colorNames[nextColor]));
                         })
                 .bounds(xRight, y + (spacing * 7), width, 20).build());
-        // y + (spacing * 7) yaptık ki stil butonunun (spacing * 6) bir tık altında dursun
+
+        this.addRenderableWidget(CycleButton.builder((CameraViewConfig.VisualStyle style) ->
+                        Component.literal(style.name().charAt(0) + style.name().substring(1).toLowerCase()))
+                .withValues(CameraViewConfig.VisualStyle.values())
+                .withInitialValue(CameraViewConfig.CLIENT.visualStyle.get())
+                .displayOnlyValue()
+                .create(xRight, y + (spacing * 8), width, 20, Component.literal("Icon Style"), (button, value) -> {
+                    CameraViewConfig.CLIENT.visualStyle.set(value);
+                }));
+
+// İkon Y-Offset Slider (Kameradan bağımsız yükseklik ayarı)
+        this.addRenderableWidget(new FloatSlider(xRight, y + (spacing * 9), width, "Icon Y-Offset", CameraViewConfig.CLIENT.iconYOffset.get(), -2.0, 2.0, (val) -> {
+            CameraViewConfig.CLIENT.iconYOffset.set(val);
+        }));
+
+        // YENİ: Parallax Assist Butonu
+        this.addRenderableWidget(CycleButton.onOffBuilder(CameraViewConfig.CLIENT.enableParallaxAssist.get())
+                .create(xLeft, y + (spacing * 6), width, 20, Component.literal("Parallax Assist"), (btn, val) -> {
+                    CameraViewConfig.CLIENT.enableParallaxAssist.set(val);
+                }));
+
     }
 
     @Override
@@ -139,7 +171,7 @@ public class CameraConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        CameraViewConfig.SPEC.save();
+        CameraViewConfig.SPEC.save(); // Ayarları dosyaya yazar
         super.onClose();
     }
 
