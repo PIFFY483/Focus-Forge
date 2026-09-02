@@ -28,6 +28,8 @@ public class ShoulderCamModeOverlay implements IGuiOverlay {
         String text = I18n.get("hud.lockon.shoulder_cam", modeLabel);
         int color = isOld ? COLOR_OLD : COLOR_NEW;
 
-        guiGraphics.drawString(mc.font, text, 6, 6, color, true);
+        // Sol ALT: üstteki satır (LockType'ın hemen üstü)
+        int y = screenHeight - 6 - (mc.font.lineHeight * 2) - 1;
+        guiGraphics.drawString(mc.font, text, 6, y, color, true);
     }
 }

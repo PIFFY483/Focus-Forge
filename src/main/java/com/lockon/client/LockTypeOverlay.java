@@ -26,6 +26,8 @@ public class LockTypeOverlay implements IGuiOverlay {
         String text = I18n.get("hud.lockon.lock_type", isType1 ? "1" : "2");
         int color = isType1 ? COLOR_TYPE_1 : COLOR_TYPE_2;
 
-        guiGraphics.drawString(mc.font, text, 6, 16, color, true);
+        // Sol ALT: en alttaki satır
+        int y = screenHeight - 6 - mc.font.lineHeight;
+        guiGraphics.drawString(mc.font, text, 6, y, color, true);
     }
 }
