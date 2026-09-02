@@ -4,6 +4,7 @@ import com.lockon.config.CameraViewConfig;
 import com.lockon.camera.ShoulderCamMode;
 import com.lockon.brs.camera.OrbitCameraState;
 import com.lockon.brs.camera.SemiOrbitController;
+import com.lockon.brs.client.gui.LockOnConfigScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -13,7 +14,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraftforge.common.ForgeConfigSpec;
-import com.lockon.config.CameraViewConfig.VisualStyle;
 
 import java.util.function.Consumer;
 
@@ -158,19 +158,13 @@ public class CameraConfigScreen extends Screen {
                         })
                 .bounds(xRight, y + (spacing * 7), width, 20).build());
 
-        this.addRenderableWidget(CycleButton.builder((CameraViewConfig.VisualStyle style) ->
-                        Component.literal(style.name().charAt(0) + style.name().substring(1).toLowerCase()))
-                .withValues(CameraViewConfig.VisualStyle.values())
-                .withInitialValue(CameraViewConfig.CLIENT.visualStyle.get())
-                .displayOnlyValue()
-                .create(xRight, y + (spacing * 8), width, 20, Component.translatable("camera.config.icon_style"), (button, value) -> {
-                    CameraViewConfig.CLIENT.visualStyle.set(value);
-                }));
-
-        // Icon Y-Offset Slider (height adjustment independent of the camera)
-        this.addRenderableWidget(new FloatSlider(xRight, y + (spacing * 9), width, "camera.config.icon_y_offset", CameraViewConfig.CLIENT.iconYOffset.get(), -2.0, 2.0, (val) -> {
-            CameraViewConfig.CLIENT.iconYOffset.set(val);
-        }));
+        // Lock-on icon (crosshair) rendering now lives entirely in the shared
+        // BRS lock renderer, so both the "O" and "C" HUDs read/write the same
+        // settings and stay in sync. This opens that same settings screen.
+        this.addRenderableWidget(Button.builder(
+                        Component.translatable("screen.lockon.brs_lockon_settings.button"),
+                        btn -> this.minecraft.setScreen(new LockOnConfigScreen(this)))
+                .bounds(xRight, y + (spacing * 8), width, 20).build());
 
         // Parallax Assist Button
         this.addRenderableWidget(CycleButton.onOffBuilder(CameraViewConfig.CLIENT.enableParallaxAssist.get())
