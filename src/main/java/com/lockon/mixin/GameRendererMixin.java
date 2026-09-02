@@ -1,6 +1,8 @@
 package com.lockon.mixin;
 
 import com.lockon.camera.CameraStateManager;
+import com.lockon.camera.ShoulderCamMode;
+import com.lockon.brs.camera.FovController;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,10 +14,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class GameRendererMixin {
 
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
-    private void applyLockOnZoom(Camera camera, float partialTicks, boolean useSpecialFovModifier, CallbackInfoReturnable<Double> cir) {
-        if (CameraStateManager.lockedTarget != null && CameraStateManager.cameraMode == 1) {
-            double currentZoom = CameraStateManager.zoomLerp;
-            cir.setReturnValue(cir.getReturnValue() * currentZoom);
+    private void applyShoulderCamFov(Camera camera, float partialTicks, boolean useSpecialFovModifier, CallbackInfoReturnable<Double> cir) {
+        if (ShoulderCamMode.isOld()) {
+            // --- OLD shoulder cam (Focus Forge) ---
+            if (CameraStateManager.lockedTarget != null && CameraStateManager.cameraMode == 1) {
+                double currentZoom = CameraStateManager.zoomLerp;
+                cir.setReturnValue(cir.getReturnValue() * currentZoom);
+            }
+        } else {
+            // --- NEW shoulder cam (eski BRS) ---
+            double baseFov = cir.getReturnValue();
+            double modifiedFov = FovController.calculateFov(baseFov, partialTicks);
+            cir.setReturnValue(modifiedFov);
         }
     }
 }

@@ -35,11 +35,20 @@ public class KeyBindings {
             KEY_CATEGORY
     );
 
+    // Lock Type 1 <-> Lock Type 2 geçişi (Varsayılan: L)
+    public static final KeyMapping LOCK_TYPE_TOGGLE_KEY = new KeyMapping(
+            "key.lockon.lock_type_toggle",
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_L,
+            KEY_CATEGORY
+    );
+
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(LOCK_KEY);
         event.register(TARGET_SWITCH_KEY);
         event.register(CAMERA_CONFIG_KEY);
+        event.register(LOCK_TYPE_TOGGLE_KEY);
     }
 
     // Tuşa basıldığında  CameraConfigScreen ekranını açan iç sınıf
@@ -49,6 +58,17 @@ public class KeyBindings {
         public static void onKeyInput(InputEvent.Key event) {
             if (CAMERA_CONFIG_KEY.consumeClick()) {
                 Minecraft.getInstance().setScreen(new CameraConfigScreen());
+            }
+
+            if (LOCK_TYPE_TOGGLE_KEY.consumeClick()) {
+                com.lockon.lock.LockType.toggle();
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null) {
+                    mc.player.displayClientMessage(
+                            net.minecraft.network.chat.Component.literal(
+                                    "Lock Type: " + (com.lockon.lock.LockType.isType1() ? "1" : "2")),
+                            true);
+                }
             }
         }
     }

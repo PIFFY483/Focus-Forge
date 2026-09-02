@@ -57,6 +57,18 @@ public class CrosshairHandler {
         return item instanceof BowItem || item instanceof CrossbowItem || item instanceof TridentItem;
     }
 
+    /**
+     * Oyuncu şu an ana elinde veya boş elinde nişan alınabilen (yay/arbalet/mızrak
+     * gibi) bir silah tutuyor mu? Parallax assist crosshair kayması (bkz.
+     * updateTargetOffset) ile New Camera'nın kamera-kaydırması (bkz.
+     * VirtualCameraHandler#calculateShoulderPosition) aynı koşulu paylaşsın diye
+     * public'e açıldı.
+     */
+    public static boolean isAimableHeld(LivingEntity player) {
+        return isThrowable(player.getMainHandItem().getItem()) ||
+                isThrowable(player.getOffhandItem().getItem());
+    }
+
     private static void drawPremiumCrosshair(GuiGraphics graphics, float offsetX) {
         Minecraft mc = Minecraft.getInstance();
         int centerX = (int) (mc.getWindow().getGuiScaledWidth() / 2 + offsetX);

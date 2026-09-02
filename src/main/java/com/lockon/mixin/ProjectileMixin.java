@@ -15,6 +15,13 @@ public abstract class ProjectileMixin {
 
     @Inject(method = "shoot(DDDFF)V", at = @At("HEAD"), cancellable = true)
     private void lockon$redirectShoot(double x, double y, double z, float velocity, float inaccuracy, CallbackInfo ci) {
+        Projectile self = (Projectile) (Object) this;
+
+        // Havai fişek roketi Parallax Assist'ten muaf: elytra ile uçarken firework'ün
+        // yönü/yörüngesi crosshair hedefine kilitlenirse elytra boost'u (attachedToEntity
+        // bağlantısı) bozuluyor ve karakter uçmuyor.
+        if (self instanceof net.minecraft.world.entity.projectile.FireworkRocketEntity) return;
+
         // Kilitlenme KAPALI ve Omuz Kamerası AÇIK iken mermiyi düzelt
         if (!LockState.isLocked() && CameraViewConfig.ENABLE_SHOULDER_CAM.get() && CameraViewConfig.CLIENT.enableParallaxAssist.get()){
 
@@ -23,7 +30,7 @@ public abstract class ProjectileMixin {
             Vec3 source = CrosshairTargetHelper.getMuzzlePosition();
 
             if (target != null && source != null) {
-                Projectile projectile = (Projectile) (Object) this;
+                Projectile projectile = self;
 
                 // Merminin gideceği yönü kameradan hedefe doğru hesapla
                 Vec3 dir = target.subtract(source).normalize();

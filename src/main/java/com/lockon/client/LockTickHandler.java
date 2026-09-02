@@ -136,6 +136,18 @@ public class LockTickHandler {
         if (event.phase != TickEvent.Phase.START) return;
         if (mc.player == null || mc.level == null) return;
 
+        // --- Lock Type 2 (eski BRS) aktifken bu sistem (Lock Type 1) devre dışı ---
+        if (!com.lockon.lock.LockType.isType1()) {
+            if (LockState.isLocked()) {
+                LockState.unlock();
+                CameraStateManager.onUnlock(mc);
+                lastUnlockTime = System.currentTimeMillis();
+            }
+            if (originalMouseSensitivity != -1.0) {
+                restoreOriginalMouseSensitivity();
+            }
+            return;
+        }
 
         boolean isCurrentlyLocked = LockState.isLocked();
 

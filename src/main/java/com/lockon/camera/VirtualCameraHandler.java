@@ -20,6 +20,12 @@ public class VirtualCameraHandler {
 
     @SubscribeEvent
     public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
+        // NEW shoulder cam (eski BRS) aktifken bu (OLD) sistem devre dışı kalır.
+        if (ShoulderCamMode.isNew()) {
+            lerpPos = Vec3.ZERO;
+            return;
+        }
+
         Minecraft mc = Minecraft.getInstance();
 
         if (!CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {

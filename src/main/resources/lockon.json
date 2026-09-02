@@ -14,7 +14,11 @@
     "MouseHandlerMixin",
     "ServerLevelMixin",
     "ProjectileMixin",
-    "ItemMixin"
+    "ItemMixin",
+    "brs.GameRendererBobMixin",
+    "brs.KeyboardHandlerMixin",
+    "brs.LivingEntityRendererAlphaMixin",
+    "brs.TimerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

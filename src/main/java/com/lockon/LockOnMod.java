@@ -3,6 +3,9 @@ package com.lockon;
 import com.lockon.config.CameraViewConfig;
 import com.lockon.config.LockOnConfig;
 import com.lockon.client.LockOnConfigScreen;
+import com.lockon.brs.network.BRSPackets;
+import com.lockon.brs.config.CameraConfig;
+import com.lockon.shared.config.SharedListConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -29,11 +32,21 @@ public class LockOnMod {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LockOnConfig.CLIENT_SPEC);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CameraViewConfig.SPEC, "lockon-camera-setting.toml");
 
+        // OLD ve NEW kamera modlarının ORTAK kullandığı entity blacklist + blok listeleri
+        // (bkz. com.lockon.shared.config.SharedListConfig).
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SharedListConfig.SPEC, "lockon-shared-lists.toml");
+
         ENTITIES.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(new com.lockon.client.LockTickHandler());
 
+        // --- NEW shoulder cam (eski BRS projesinden taşındı) ---
+        // NOT: com.lockon.brs.lock.LockTickHandler kendi @Mod.EventBusSubscriber
+        // anotasyonuyla otomatik kaydoluyor, burada elle register etmeye gerek yok.
+        BRSPackets.register();
 
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CameraConfig.SPEC, "brs-camera.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, com.lockon.brs.config.LockOnConfig.SPEC, "brs-lockon.toml");
 
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new LockOnConfigScreen(parent)));

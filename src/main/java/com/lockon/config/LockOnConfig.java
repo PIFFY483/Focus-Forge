@@ -3,9 +3,7 @@ package com.lockon.config;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.BuiltInRegistries;
-import java.util.Arrays;
+import com.lockon.shared.config.SharedListConfig;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -33,8 +31,11 @@ public class LockOnConfig {
 
     // Targeting
     public static final ForgeConfigSpec.IntValue TARGET_SCAN_FREQUENCY;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_TARGET_BLACKLIST;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TARGET_BLACKLIST;
+    // NOT: Entity blacklist artık OLD ve NEW kamera modları arasında ORTAK.
+    // Gerçek tanım com.lockon.shared.config.SharedListConfig içinde; burada
+    // sadece eski kod tabanının bozulmaması için alias tutuluyor.
+    public static final ForgeConfigSpec.BooleanValue ENABLE_TARGET_BLACKLIST = SharedListConfig.ENABLE_TARGET_BLACKLIST;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TARGET_BLACKLIST = SharedListConfig.TARGET_BLACKLIST;
 
     // Target Scanning & Lock State
     public static final ForgeConfigSpec.BooleanValue TARGET_PLAYERS;
@@ -49,8 +50,10 @@ public class LockOnConfig {
     // --------------------------------------------
 
     // Block Lists
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> lockPreclusionBlockList;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> lockAcquisitionBlockList;
+    // NOT: Artık OLD ve NEW kamera modları arasında ORTAK — gerçek tanım
+    // com.lockon.shared.config.SharedListConfig içinde.
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> lockPreclusionBlockList = SharedListConfig.LOCK_PRECLUSION_BLOCK_LIST;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> lockAcquisitionBlockList = SharedListConfig.LOCK_ACQUISITION_BLOCK_LIST;
 
     static {
         Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
@@ -74,8 +77,7 @@ public class LockOnConfig {
 
         // Targeting Ayarlarının Ataması
         TARGET_SCAN_FREQUENCY = CLIENT.targetScanFrequency;
-        ENABLE_TARGET_BLACKLIST = CLIENT.enableTargetBlacklist;
-        TARGET_BLACKLIST = CLIENT.targetBlacklist;
+        // ENABLE_TARGET_BLACKLIST / TARGET_BLACKLIST artık SharedListConfig'ten geliyor (alan tanımında alias edildi).
 
         // TargetScanner için kritik olanların ataması
         TARGET_PLAYERS = CLIENT.targetPlayers;
@@ -88,9 +90,7 @@ public class LockOnConfig {
         CROSSHAIR_Y_SIZE = CLIENT.crosshairYSize;
 
 
-        // Block List Atamaları
-        lockPreclusionBlockList = CLIENT.lockPreclusionBlockList;
-        lockAcquisitionBlockList = CLIENT.lockAcquisitionBlockList;
+        // Block List Atamaları artık SharedListConfig'ten geliyor (alan tanımında alias edildi).
     }
 
     public static class Client {
@@ -112,8 +112,7 @@ public class LockOnConfig {
 
         // Targeting Config Alanları
         public final ForgeConfigSpec.IntValue targetScanFrequency;
-        public final ForgeConfigSpec.BooleanValue enableTargetBlacklist;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> targetBlacklist;
+        // enableTargetBlacklist / targetBlacklist artık SharedListConfig'te (ortak).
 
         // Lock State/Scanning Alanları
         public final ForgeConfigSpec.BooleanValue targetPlayers;
@@ -125,10 +124,7 @@ public class LockOnConfig {
         public final ForgeConfigSpec.DoubleValue crosshairXZSize;
         public final ForgeConfigSpec.DoubleValue crosshairYSize;
 
-
-        // Block Lists
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> lockPreclusionBlockList;
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> lockAcquisitionBlockList;
+        // lockPreclusionBlockList / lockAcquisitionBlockList artık SharedListConfig'te (ortak).
 
         public Client(ForgeConfigSpec.Builder builder) {
             builder.push("Visuals");
@@ -183,45 +179,10 @@ public class LockOnConfig {
             this.targetScanFrequency = builder.comment("Oyuncunun etrafındaki yeni bir hedefi ve mevcut hedefin geçerliliğini ne sıklıkla (tick cinsinden) tarayacağını belirler. (20 tick = 1 saniye)")
                     .defineInRange("targetScanFrequency", 10, 1, 60);
 
-            this.enableTargetBlacklist = builder.comment("Varlık kara listesini etkinleştirir/devre dışı bırakır.")
-                    .define("enableTargetBlacklist", true);
-
-            this.targetBlacklist = builder.comment("Kara liste etkinleştirildiğinde kilitlenemeyecek varlık adlarının listesi (örn: 'minecraft:creeper').")
-                    .defineList("targetBlacklist",
-                            Arrays.asList("minecraft:enderman", "minecraft:iron_golem"),
-                            LockOnConfig::validateEntityId);
+            // enableTargetBlacklist / targetBlacklist ve BlockLists (acquisition/preclusion)
+            // artık OLD ve NEW kamera modları arasında ORTAK — bkz. com.lockon.shared.config.SharedListConfig.
 
             builder.pop();
-
-            builder.push("BlockLists");
-            this.lockPreclusionBlockList = builder
-                    .comment("KİLİDİN KIRILMASINI ENGELLEYEN bloklarin Whitelist'i. Hedef, bu bloklarin arkasina gecerse kilit KIRILMAZ. Ornek: minecraft:tall_grass, #minecraft:mineable/hoe")
-                    .defineList("lockPreclusionBlockList", () -> List.of("minecraft:tall_grass", "minecraft:dandelion", "minecraft:poppy", "minecraft:sugar_cane"), LockOnConfig::validateBlockId);
-
-            this.lockAcquisitionBlockList = builder
-                    .comment("YENI BIR KILITLENMENIN bu bloklarin arkasindan veya icinden gecmesine izin veren bloklarin Whitelist'i. SIKI FİLTRELEME: Varsayilan olarak YALNIZCA bu listedeki ID'ler/Etiketler VEYA 'lockon:pass_through' tag'ine sahip bloklar gecise izin verir.")
-                    .defineList("lockAcquisitionBlockList", () -> List.of("minecraft:tall_grass", "minecraft:dandelion", "minecraft:poppy", "minecraft:sugar_cane"), LockOnConfig::validateBlockId);
-            builder.pop();
         }
-    }
-
-    public static boolean validateBlockId(Object o) {
-        if (o instanceof String blockId && !blockId.isEmpty()) {
-            ResourceLocation rl = ResourceLocation.tryParse(blockId);
-            if (rl != null && BuiltInRegistries.BLOCK.containsKey(rl) || blockId.startsWith("#")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean validateEntityId(Object o) {
-        if (o instanceof String entityId && !entityId.isEmpty()) {
-            ResourceLocation rl = ResourceLocation.tryParse(entityId);
-            if (rl != null && BuiltInRegistries.ENTITY_TYPE.containsKey(rl) || entityId.startsWith("#")) {
-                return true;
-            }
-        }
-        return false;
     }
 }

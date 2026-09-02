@@ -22,6 +22,10 @@ public abstract class ItemMixin {
     private void lockon$prepareItemLaunch(net.minecraft.world.level.Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
         if (!level.isClientSide) return;
 
+        // Havai fişek roketi Parallax Assist'ten muaf (elytra boost'unu bozmasın diye) —
+        // bkz. ServerLevelMixin/ProjectileMixin'deki aynı muafiyet.
+        if (player.getItemInHand(hand).getItem() instanceof net.minecraft.world.item.FireworkRocketItem) return;
+
         Minecraft mc = Minecraft.getInstance();
         // Sadece omuz kamerasında ve kilitli değilken hedefi önceden hesaplar
         if (CameraViewConfig.ENABLE_SHOULDER_CAM.get() && !LockState.isLocked() && CameraViewConfig.CLIENT.enableParallaxAssist.get() && !mc.options.getCameraType().isFirstPerson()) {

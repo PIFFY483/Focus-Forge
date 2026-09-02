@@ -1,6 +1,8 @@
 package com.lockon.client;
 
 import com.lockon.config.LockOnConfig;
+import com.lockon.shared.gui.LockOnBlockListScreen;
+import com.lockon.shared.gui.LockOnEntityListScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;

@@ -30,6 +30,12 @@ public abstract class ServerLevelMixin {
         if (!(entity instanceof Projectile original) || !(original.getOwner() instanceof Player player)) return;
         if (LockState.isLocked() || !CameraViewConfig.ENABLE_SHOULDER_CAM.get() || !CameraViewConfig.CLIENT.enableParallaxAssist.get()) return;
 
+        // Havai fişek roketi Parallax Assist'ten muaf: bu mixin mermiyi silip yeni bir
+        // kopyasıyla değiştiriyor, bu da elytra ile uçarken firework'ün oyuncuya
+        // "attachedToEntity" bağlantısını kaybetmesine ve boost'un hiç uygulanmamasına
+        // (karakterin uçmamasına) sebep oluyordu.
+        if (entity instanceof net.minecraft.world.entity.projectile.FireworkRocketEntity) return;
+
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.getCameraType().isFirstPerson()) return;
 
