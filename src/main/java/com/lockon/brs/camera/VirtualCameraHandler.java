@@ -37,24 +37,20 @@ public class VirtualCameraHandler {
 
     private static Vec3 lerpPos = Vec3.ZERO;
 
-    // ── DUVAR ÇARPIŞMASI SONRASI YUMUŞAK TOPARLANMA ──
+    // DUVAR ÇARPIŞMASI SONRASI YUMUŞAK TOPARLANMA
     private static final SmoothDamp.State1D collisionDistanceState = new SmoothDamp.State1D();
 
-    // ── FPV ↔ TPV SMOOTH TRANSITION STATE ──
+    // FPV  TPV SMOOTH TRANSITION STATE
     private static float transitionProgress = 0.0f; // 0 = FPV, 1 = TPV
     private static CameraType lastCameraType = CameraType.FIRST_PERSON;
     private static boolean transitioningToFpv = false;
 
-    // ── Saf FPV'de shake'in pozisyon değil açı-jitter'ı olarak uygulanma çarpanı ──
     private static final float FPV_SHAKE_ANGLE_SCALE = 6.0f;
 
     private static float aimAssistShift = 0.0f;
     private static final float AIM_ASSIST_SHIFT_STRENGTH = 0.5f; // side offsetin en fazla %50'si kadar merkeze kayar
     private static final float AIM_ASSIST_SHIFT_SMOOTHING = 0.12f; // per-frame lerp faktörü
 
-    /**
-     * Geçiş animasyonu aktif mi?
-     */
     public static boolean isTransitioning() {
         return transitioningToFpv || transitionProgress > 0.01f;
     }
@@ -85,14 +81,12 @@ public class VirtualCameraHandler {
         double pz = Mth.lerp(pt, mc.player.zo, mc.player.getZ());
         Vec3 eyePos = new Vec3(px, py, pz);
 
-        // ── Screen Shake: kamera modundan bağımsız, en başta hesapla ──
         boolean shakeActive = ScreenShakeController.isActive();
         Vec3 shakeOffset = shakeActive
                 ? new Vec3(ScreenShakeController.getOffsetX(), ScreenShakeController.getOffsetY(), 0.0)
                 : Vec3.ZERO;
         float shakeRoll = shakeActive ? ScreenShakeController.getRollOffset() : 0.0f;
 
-        // ── Temel kontroller (saf FPV / shoulder cam kapalı) ──
         if (!CameraConfig.ENABLE_SHOULDER_CAM.get()) {
             lerpPos = Vec3.ZERO;
             OrbitCameraState.reset();
@@ -106,7 +100,6 @@ public class VirtualCameraHandler {
                 mixinCamera.brs$setDetached(false);
             }
 
-            // ── Shake'i pozisyon değil, açı jitter'ı olarak uygula ──
             if (shakeActive) {
                 float yawPunch = (float) shakeOffset.x * FPV_SHAKE_ANGLE_SCALE;
                 float pitchPunch = (float) shakeOffset.y * FPV_SHAKE_ANGLE_SCALE;
@@ -123,7 +116,7 @@ public class VirtualCameraHandler {
         if (lastCameraType != CameraType.FIRST_PERSON && currentType == CameraType.FIRST_PERSON) {
             transitioningToFpv = true;
             if (OrbitCameraState.isOrbitActive()) {
-                // Anında reset atmak yerine Orbit'ten Omuz pozisyonuna yumuşak dönüş başlat
+                // Anında reset atmak yerine Orbitten Omuz pozisyonuna yumuşak dönüş başlat
                 OrbitCameraState.requestExit();
             }
         }
@@ -137,7 +130,7 @@ public class VirtualCameraHandler {
             transitionProgress = targetProgress;
             transitioningToFpv = false;
         } else {
-            // Frame-rate bağımsız smooth transition
+
             float speed = (float) CameraRig.transitionSpeed;
             float frameLerp = 1.0f - (float) Math.pow(1.0 - Mth.clamp(speed, 0.001f, 0.999f), frameDelta);
             transitionProgress = Mth.lerp(frameLerp, transitionProgress, targetProgress);
@@ -152,7 +145,6 @@ public class VirtualCameraHandler {
             transitioningToFpv = false;
         }
 
-        // ── FPV'ye yakın / orbit kapalı durum ──
         if (transitionProgress < 0.01f && !OrbitCameraState.isOrbitActive() && !transitioningToFpv) {
             lerpPos = Vec3.ZERO;
             collisionDistanceState.initialized = false;
@@ -172,7 +164,7 @@ public class VirtualCameraHandler {
             return;
         }
 
-        // ── Orbit geçişlerini güncelle ──
+        // Orbit geçişlerini güncelle
         OrbitCameraState.updateTransition(frameDelta,
                 (float) CameraRig.orbitTransitionSpeed);
         OrbitCameraState.updateAutoRotate(frameDelta,
@@ -203,7 +195,6 @@ public class VirtualCameraHandler {
                 effectiveShoulderDistance, lockDistanceDelta, aimAssistShift);
         Vec3 orbitPos = calculateOrbitPosition(eyePos);
 
-        // ── Orbit geçiş lerp'i (smoothstep easing ile) ──
         float t = OrbitCameraState.getEasedProgress();
         Vec3 targetPos = new Vec3(
                 Mth.lerp(t, shoulderPos.x, orbitPos.x),
@@ -232,7 +223,6 @@ public class VirtualCameraHandler {
             SmoothDamp.smoothDamp(collisionDistanceState, (float) allowedDistance, smoothTime,
                     Float.MAX_VALUE, deltaSeconds);
         }
-        // else: zaten hedef mesafedeyiz
 
         if (fullDistance > 1.0e-4) {
             targetPos = eyePos.add(camDir.scale(collisionDistanceState.value / fullDistance));
@@ -261,7 +251,6 @@ public class VirtualCameraHandler {
 
         PlayerTransparencyController.update(lerpPos, eyePos, frameDelta);
 
-        // ── Kameraya gönder (shake offset + roll dahil) ──
         if (camera instanceof CameraMixinInterface mixinCamera) {
             Vec3 finalPos = shakeActive ? lerpPos.add(shakeOffset) : lerpPos;
             mixinCamera.brs$setCustomPosition(finalPos);
@@ -328,7 +317,7 @@ public class VirtualCameraHandler {
                 return hit; // Gerçek engel — burada dur
             }
 
-            // İnce blok: hit noktasının hemen ötesinden taramaya devam et
+            //  hit noktasının hemen ötesinden taramaya devam et
             Vec3 dir = end.subtract(currentStart);
             double len = dir.length();
             if (len < 1.0e-4) return hit;
@@ -357,7 +346,7 @@ public class VirtualCameraHandler {
         side *= (1.0 - aimAssistShift * AIM_ASSIST_SHIFT_STRENGTH);
         double vert = CameraConfig.HEIGHT_OFFSET.get() * smoothProgress;
 
-        // ── DİNAMİK Y YÜKSEKLİĞİ (GENEL OTO HİZALAMA) ──
+        //  DİNAMİK Y
         if (CameraConfig.ENABLE_DYNAMIC_Y_OFFSET.get()) {
             double extraDistance = Math.max(0.0, back - 2.0);
             vert += extraDistance * CameraConfig.DYNAMIC_Y_FACTOR.get();
@@ -380,9 +369,6 @@ public class VirtualCameraHandler {
         return eyePos.add(offX, offY, offZ);
     }
 
-    /**
-     * Orbit pozisyon hesabı.
-     */
     private static Vec3 calculateOrbitPosition(Vec3 eyePos) {
         float yaw = OrbitCameraState.getOrbitYaw();
         float pitch = OrbitCameraState.getOrbitPitch();

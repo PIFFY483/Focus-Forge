@@ -7,11 +7,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
-/**
- * Sol üst köşede hangi kilitlenme (lock-on) sisteminin (Type 1: Focus Forge /
- * Type 2: eski BRS) aktif olduğunu gösteren küçük bir gösterge.
- * L tuşuyla değiştirilir (bkz. KeyBindings.LOCK_TYPE_TOGGLE_KEY).
- */
 public class LockTypeOverlay implements IGuiOverlay {
 
     public static final LockTypeOverlay INSTANCE = new LockTypeOverlay();
@@ -31,7 +26,6 @@ public class LockTypeOverlay implements IGuiOverlay {
         String text = I18n.get("hud.lockon.lock_type", isType1 ? "1" : "2");
         int color = isType1 ? COLOR_TYPE_1 : COLOR_TYPE_2;
 
-        // Shoulder Cam göstergesinin (satır 6) hemen altına.
         guiGraphics.drawString(mc.font, text, 6, 16, color, true);
     }
 }

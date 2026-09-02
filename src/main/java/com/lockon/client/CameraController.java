@@ -84,10 +84,6 @@ public class CameraController {
         }
     }
 
-    /**
-     * NİHAİ ÇÖZÜM: Titreme (Jitter) ve Kaymayı (Drift) Kökten Çözen Mantık.
-     * Maksimum yumuşatma çarpanı (FRAME_SMOOTH_FACTOR) config'den alınmıştır.
-     */
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (mc.player == null) return;
@@ -103,7 +99,7 @@ public class CameraController {
 
                 float partialTicks = event.getPartialTick(); // KRİTİK: Kısmi tikleri al
 
-                // 1. SMOOTH HEDEF POZİSYONLARINI HESAPLA (Mob hareketinden kaynaklanan Jitter'ı çözer)
+                // SMOOTH HEDEF POZİSYONLARINI HESAPLA
                 double focusOffset = LockOnConfig.CAMERA_FOCUS_OFFSET.get();
 
                 // Hedefin yumuşak pozisyonu
@@ -117,7 +113,7 @@ public class CameraController {
                 double playerZ = Mth.lerp(partialTicks, player.zOld, player.getZ());
 
 
-                // 2. SMOOTH HEDEF AÇILARINI HESAPLA
+                //SMOOTH HEDEF AÇILARINI HESAPLA
                 double dX = targetX - playerX;
                 double dY = targetY - playerY;
                 double dZ = targetZ - playerZ;
@@ -127,14 +123,13 @@ public class CameraController {
                 float smoothTargetYaw = (float) Mth.wrapDegrees(Math.toDegrees(Mth.atan2(dZ, dX)) - 90.0);
 
 
-                // 3. titreşim hafiflet
+                // titreşim hafiflet
                 float currentYaw = player.getYRot();
                 float currentPitch = player.getXRot();
                 float rawLockSpeed = LockOnConfig.LOCK_SPEED.get().floatValue();
 
                 final float FRAME_SMOOTH_FACTOR;
 
-                // KRİTİK: Maksimum Çarpanı Config'den alır
                 final float MAX_INTERPOLATION_FACTOR = LockOnConfig.MAX_SMOOTHING_FACTOR.get().floatValue();
 
                 if (rawLockSpeed >= 0.99) {
@@ -147,7 +142,6 @@ public class CameraController {
                 float deltaYaw = Mth.wrapDegrees(smoothTargetYaw - currentYaw);
                 float deltaPitch = smoothTargetPitch - currentPitch;
 
-                // Soft Interpolasyon: Kamera hareketindeki titremeyi engeller.
                 float interpolatedYaw = currentYaw + deltaYaw * FRAME_SMOOTH_FACTOR;
                 float interpolatedPitch = currentPitch + deltaPitch * FRAME_SMOOTH_FACTOR;
 

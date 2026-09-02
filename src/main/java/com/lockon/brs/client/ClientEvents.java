@@ -20,7 +20,6 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 @Mod.EventBusSubscriber(modid = LockOnMod.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
 
-    // ── Her client tick (20/sn) — mantık/config güncellemeleri burada kalıyor ──
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -30,7 +29,6 @@ public class ClientEvents {
         CameraRig.update(mc, mc.getFrameTime());
     }
 
-    // ── Her render frame'de — kilit kamerası burada, FPS'e bağlı olarak smooth çalışır ──
     @SubscribeEvent
     public static void onRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
@@ -41,15 +39,12 @@ public class ClientEvents {
         float frameDeltaTicks = mc.getDeltaFrameTime();
         float deltaMs = frameDeltaTicks * 50.0f;
 
-        // ── HitStop'u güncelle ──
         float timeScale = HitStopController.tick(deltaMs);
 
-        // ── Diğer sistemler scaledDelta ile çalışır ──
         float scaledDeltaSeconds = (deltaMs / 1000.0f) * timeScale;
         ScreenShakeController.tick(scaledDeltaSeconds);
         FovController.tick(scaledDeltaSeconds);
 
-        // ── Semi Orbit: durgun/hareket durumuna göre otomatik orbit <-> omuz ──
         if (com.lockon.camera.ShoulderCamMode.isNew()) {
             SemiOrbitController.tick(mc, frameDeltaTicks);
         }
@@ -70,20 +65,14 @@ public class ClientEvents {
                 mc.setScreen(new CameraConfigScreen(null));
             }
         }
-        // ALT: artık 3 adımlı bir döngü - New Camera (shoulder, BRS) -> Semi Orbit
-        // -> Orbit -> tekrar New. Old Camera bu döngünün tamamen dışında tutuluyor;
-        // Old'a sadece "/ff old cam" komutuyla geçilebiliyor ve Old moddayken ALT
-        // hiçbir şeyi değiştirmiyor (bkz. com.lockon.brs.client.FFCommand -
-        // /ff old cam, /ff new cam, /ff semiorbit cam, /ff orbit cam, /ff close).
+
         if (KeyBindings.ORBIT_TOGGLE_KEY.consumeClick()) {
             if (mc.screen == null && mc.player != null) {
                 if (com.lockon.camera.ShoulderCamMode.isOld()) {
-                    // OLD moddayken ALT artık devre dışı - OLD'dan çıkış sadece komutla olur.
+                    // OLD moddayken ALT artık devre dışı - OLDdan çıkış sadece komutla olur.
                     return;
                 }
 
-                // ALT elle basıldıysa Semi Orbit'in otomatik kontrolünü iptal et,
-                // manuel toggle önceliklidir.
                 // 3 adımlı döngü: 1) New (Shoulder)  2) Semi Orbit  3) Orbit  -> tekrar 1)
                 String labelKey;
                 if (SemiOrbitController.isEnabled()) {
@@ -105,7 +94,7 @@ public class ClientEvents {
         }
     }
 
-    // ── Config yüklendiğinde / değiştiğinde güncelle ──
+    //  Config yüklendiğinde / değiştiğinde güncelle
     @Mod.EventBusSubscriber(modid = LockOnMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBusEvents {
 
@@ -118,10 +107,7 @@ public class ClientEvents {
                 if (fileName.equals("brs-camera.toml")) {
                     CameraRig.loadConfig();
                 } else if (fileName.equals("brs-lockon.toml") || fileName.equals("lockon-shared-lists.toml")) {
-                    // "lockon-shared-lists.toml" -> entity blacklist + blok listeleri artık
-                    // burada tutuluyor (bkz. com.lockon.shared.config.SharedListConfig).
-                    // Bu dosya kaydedildiğinde de cache'i tazelememiz gerekiyor, yoksa
-                    // GUI'den yapılan ekleme/çıkarma oyun içi taramaya hiç yansımıyor.
+
                     TargetScanner.refreshCache();
                 }
             }

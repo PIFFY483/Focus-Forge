@@ -9,7 +9,6 @@ public class SmoothDamp {
         public float velocity;
         public boolean initialized = false;
 
-        /** İlk kare: sıçrama olmasın diye doğrudan hedefe eşitle, hızı sıfırla. */
         public void snapTo(float v) {
             this.value = v;
             this.velocity = 0f;
@@ -45,7 +44,7 @@ public class SmoothDamp {
         state.velocity = (state.velocity - omega * temp) * exp;
         float output = clampedTarget + (change + temp) * exp;
 
-        // Overshoot önleme: hedefi geçmişse tam hedefte durdur (kritik sönüm garantisi)
+        // Overshoot önleme
         if ((originalTo - state.value > 0.0f) == (output > originalTo)) {
             output = originalTo;
             state.velocity = (output - originalTo) / deltaTimeSeconds;

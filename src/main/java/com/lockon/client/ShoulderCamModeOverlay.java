@@ -7,10 +7,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
-/**
- * Ekranın sol üst köşesinde hangi omuz kamerasının (OLD: Focus Forge / NEW: eski BRS)
- * aktif olduğunu gösteren küçük bir gösterge.
- */
 public class ShoulderCamModeOverlay implements IGuiOverlay {
 
     public static final ShoulderCamModeOverlay INSTANCE = new ShoulderCamModeOverlay();

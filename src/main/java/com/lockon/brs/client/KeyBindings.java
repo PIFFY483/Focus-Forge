@@ -16,10 +16,6 @@ public class KeyBindings {
             CATEGORY_BRS
     );
 
-    // NOT: Lock ve Target Switch tuşları artık com.lockon.client.KeyBindings ile
-    // paylaşılıyor (Lock Type 1/2 aynı fiziksel tuşu kullanıyor). Bu sınıfın
-    // kendi LOCK_KEY / TARGET_SWITCH_KEY tanımları kaldırıldı.
-
     public static final KeyMapping ORBIT_TOGGLE_KEY = new KeyMapping(
             "key.brs.orbit_toggle",
             KeyConflictContext.IN_GAME,

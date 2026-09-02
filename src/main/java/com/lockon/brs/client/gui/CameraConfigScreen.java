@@ -31,8 +31,6 @@ public class CameraConfigScreen extends Screen {
         int yLeft = 30;
         int yRight = 30;
 
-        // ═══════════════ LEFT COLUMN: Shoulder Camera Settings ═══════════════
-
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_SHOULDER_CAM.get())
                 .create(leftX, yLeft, COL_WIDTH, 20,
@@ -43,7 +41,6 @@ public class CameraConfigScreen extends Screen {
                         }));
         yLeft += 25;
 
-        // ── AUTO Y ALIGN TOGGLE ──
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_DYNAMIC_Y_OFFSET.get())
                 .create(leftX, yLeft, COL_WIDTH, 20,
@@ -51,7 +48,6 @@ public class CameraConfigScreen extends Screen {
                         (btn, val) -> CameraConfig.ENABLE_DYNAMIC_Y_OFFSET.set(val)));
         yLeft += 25;
 
-        // ── DYNAMIC Y RATIO SLIDER ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
                 "camera.config.dynamic_y_ratio",
@@ -96,7 +92,6 @@ public class CameraConfigScreen extends Screen {
                 val -> CameraConfig.CAMERA_SMOOTHNESS.set(val)));
         yLeft += 25;
 
-        // ── LOCK-ON: CAMERA FOLLOW SPEED (souls-like camera lag) ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
                 "camera.config.lock_follow_speed",
@@ -104,7 +99,6 @@ public class CameraConfigScreen extends Screen {
                 val -> CameraConfig.CAMERA_FOLLOW_SPEED.set(val)));
         yLeft += 25;
 
-        // ── WALL COLLISION RECOVERY SPEED ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
                 "camera.config.collision_recovery",
@@ -112,7 +106,6 @@ public class CameraConfigScreen extends Screen {
                 val -> CameraConfig.COLLISION_RECOVERY_SPEED.set(val)));
         yLeft += 30;
 
-        // ═══════════════ RIGHT COLUMN: Camera Transition + Sub-Screens ═══════════════
 
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.SKIP_FRONT_VIEW.get())
@@ -153,7 +146,6 @@ public class CameraConfigScreen extends Screen {
         ).bounds(rightX, yRight, COL_WIDTH, 20).build());
         yRight += 30;
 
-        // ═══════════════ BOTTOM (SHARED): Defaults / OK ═══════════════
         int yBottom = Math.max(yLeft, yRight) + 10;
         int centerX = this.width / 2;
 

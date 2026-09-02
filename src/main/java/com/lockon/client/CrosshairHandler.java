@@ -54,26 +54,11 @@ public class CrosshairHandler {
         currentVisualOffset = Mth.lerp(0.15f, currentVisualOffset, targetOffset);
     }
 
-    /**
-     * Bu item elde tutulduğunda parallax-assist crosshair kayması ve New
-     * Camera'nın omuz kaydırması (shoulder shift) tetiklenmeli mi?
-     * - Uzak mesafeli nişan silahları: yay, arbalet, mızrak (trident)
-     * - BlockItem: yerleştirilebilir TÜM bloklar (çim, taş, TNT vs.) — inşaat
-     *   sırasında da savaş moduyla aynı kamera hissi istendiği için dahil edildi.
-     * Yiyecek (elma, ekmek vb.) ve diğer BlockItem OLMAYAN item'lar hariçtir.
-     */
     private static boolean triggersAimAssist(net.minecraft.world.item.Item item) {
         return item instanceof BowItem || item instanceof CrossbowItem || item instanceof TridentItem
                 || item instanceof BlockItem;
     }
 
-    /**
-     * Oyuncu şu an ana elinde veya boş elinde nişan alınabilen (yay/arbalet/mızrak)
-     * ya da yerleştirilebilir bir blok mu tutuyor? Parallax assist crosshair
-     * kayması (bkz. updateTargetOffset) ile New Camera'nın kamera-kaydırması
-     * (bkz. VirtualCameraHandler#calculateShoulderPosition) aynı koşulu
-     * paylaşsın diye public'e açıldı.
-     */
     public static boolean isAimableHeld(LivingEntity player) {
         return triggersAimAssist(player.getMainHandItem().getItem()) ||
                 triggersAimAssist(player.getOffhandItem().getItem());
@@ -126,7 +111,6 @@ public class CrosshairHandler {
             }
             case 2 -> { // DYNAMIC DOT (MINIMAL)
                 if (pull < 1.0f) {
-                    // Yay gerilirken nokta 1 pikselden 2 piksele çıkar (3 piksel çok büyüktü)
                     int size = pull > 0.6f ? 2 : 1;
                     int off = size / 2;
                     graphics.fill(centerX - off, centerY - off, centerX - off + size, centerY - off + size, finalColor);
@@ -150,9 +134,7 @@ public class CrosshairHandler {
             }
 
             case 5 -> { // DOUBLE RING (Odaklanan Halkalar)
-                // Birinci halka (Dış): Yay gerildikçe 7'den 3'e düşer
                 float r1 = 4.0f * (1.0f - pull) + 3.0f;
-                // İkinci halka (İç): Yay gerildikçe 4'ten 2'ye düşer
                 float r2 = 2.0f * (1.0f - pull) + 2.0f;
 
                 drawCircle(graphics, centerX, centerY, r1, finalColor);
@@ -179,12 +161,8 @@ public class CrosshairHandler {
 
         // Ortadaki küçük rehber nokta (Dot stilinde gizli)
         if (pull >= 1.0f) {
-            // 1. Dış Katman (3x3 Çerçeve)
-            // Bu, merkezdeki noktaya hafif bir parlama (glow) efekti verir.
             graphics.renderOutline(centerX - 1, centerY - 1, 3, 3, 0xAAFFFFFF);
 
-            // 2. Çekirdek (1x1 Nokta): Tam merkezde parlayan bembeyaz asıl nokta.
-            // En son çiz herşeyin üstünde parlar
             graphics.fill(centerX, centerY, centerX + 1, centerY + 1, 0xFFFFFFFF);
         } else if (style != 2) {
             // Yay gerilmemişken duran rehber nokta

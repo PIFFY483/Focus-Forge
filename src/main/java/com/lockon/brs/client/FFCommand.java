@@ -14,14 +14,6 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/**
- * "/ff old cam", "/ff new cam", "/ff orbit cam" - üç kamera moduna doğrudan
- * geçiş için client-only komutlar.
- *
- * Bu komutlar, ALT tuşu döngüsünden (bkz. ClientEvents#onKeyInput) bağımsız
- * çalışır. ALT artık sadece New <-> Orbit arasında geçiş yapıyor; Old moduna
- * girmenin/çıkmanın TEK yolu bu komutlardır.
- */
 @Mod.EventBusSubscriber(modid = LockOnMod.MOD_ID, value = Dist.CLIENT)
 public class FFCommand {
 
@@ -62,10 +54,9 @@ public class FFCommand {
     }
 
     private static void setOld() {
-        // Manuel komut - Semi Orbit'in otomatik kontrolünü iptal et.
+
         SemiOrbitController.setEnabled(false);
-        // Orbit açıksa önce yumuşak şekilde omuz pozisyonuna çıkış başlat,
-        // sonra Old'a geç (aniden kesilmiş bir orbit transition'ı kalmasın).
+
         if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
             OrbitCameraState.requestExit();
         }
@@ -84,21 +75,15 @@ public class FFCommand {
 
     private static void setOrbit() {
         SemiOrbitController.setEnabled(false);
-        // Orbit sistemi sadece NEW omuz kamerası modunda render edildiği için
-        // (bkz. VirtualCameraHandler), önce NEW moda geçip ardından orbit'i açıyoruz.
+
         ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
         OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
         notify("camera.mode.orbit");
     }
 
-    /**
-     * Semi Orbit: karakter dururken serbest Orbit, yürürken New (omuz) kamerası;
-     * durmaktan harekete geçişte önce karakter orbit'in baktığı yöne döner,
-     * sonra kamera omuz pozisyonuna doğru kayar (bkz. SemiOrbitController).
-     */
     private static void setSemiOrbit() {
         ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
-        // Şu anki durumu net bir başlangıç noktasından başlat.
+
         if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
             OrbitCameraState.requestExit();
         }
@@ -106,23 +91,16 @@ public class FFCommand {
         notify("camera.mode.semi_orbit");
     }
 
-    /**
-     * "/ff close" - tüm özel kameraları (New/Orbit/Semi Orbit ve Old) kapatır,
-     * saf vanilla görünüme döner. HUD'daki (config ekranındaki) "Camera Type:
-     * Shoulder" ayarı da otomatik olarak "Classic"e çekilir.
-     */
     private static void closeAll() {
         SemiOrbitController.setEnabled(false);
 
-        // Orbit'i anında ve tamamen kapat (yumuşak çıkışı beklemeden - "close" anlık olmalı).
+        // Orbiti anında ve tamamen kapat
         OrbitCameraState.reset();
 
-        // NEW (BRS) omuz kamerasını kapat.
         if (CameraConfig.ENABLE_SHOULDER_CAM.get()) {
             CameraConfig.ENABLE_SHOULDER_CAM.set(false);
         }
 
-        // OLD (Focus Forge) omuz kamerasını da Classic'e çek.
         if (CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {
             CameraViewConfig.ENABLE_SHOULDER_CAM.set(false);
         }

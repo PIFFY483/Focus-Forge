@@ -40,7 +40,6 @@ public class SemiOrbitController {
         phase = Phase.SHOULDER;
     }
 
-    /** Karakterin şu an hareket girdisi (yürüme tuşları) basılı mı? */
     private static boolean isMovementInputActive(Minecraft mc) {
         if (mc.options == null) return false;
         return mc.options.keyUp.isDown() || mc.options.keyDown.isDown()
@@ -70,7 +69,6 @@ public class SemiOrbitController {
         switch (phase) {
             case SHOULDER -> {
                 if (!moving) {
-                    // Durgunluk başladı -> orbit'e gir (mevcut bakış açısından başlat)
                     OrbitCameraState.initOrbitFromPlayer(mc.player.getYRot(), mc.player.getXRot());
                     OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
                     phase = Phase.ORBIT_IDLE;
@@ -78,7 +76,6 @@ public class SemiOrbitController {
             }
             case ORBIT_IDLE -> {
                 if (moving) {
-                    // Harekete geçildi -> önce karakteri orbit'in baktığı yöne döndür
                     turnCurrentYaw = mc.player.getYRot();
                     turnTargetYaw = OrbitCameraState.getOrbitYaw();
                     phase = Phase.TURNING;
@@ -92,26 +89,26 @@ public class SemiOrbitController {
                 forcePlayerYaw(mc.player, turnCurrentYaw);
 
                 if (!moving) {
-                    // Tuş bırakıldı: dönüşü iptal edip serbest orbit'e geri dön
+
                     phase = Phase.ORBIT_IDLE;
                     return;
                 }
 
                 if (Math.abs(diff) <= TURN_DONE_EPSILON) {
-                    // Dönüş tamamlandı -> orbit kamerayı omuz noktasına doğru kaydır
+
                     OrbitCameraState.requestExit();
                     phase = Phase.EXITING;
                 }
             }
             case EXITING -> {
                 if (!moving) {
-                    // Kayma bitmeden tekrar durdu: orbit'e geri kay
+
                     OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
                     phase = Phase.ORBIT_IDLE;
                     return;
                 }
                 if (!OrbitCameraState.isOrbitActive()) {
-                    // Kayma tamamlandı, fareye tam kontrol geri döndü
+
                     phase = Phase.SHOULDER;
                 }
             }

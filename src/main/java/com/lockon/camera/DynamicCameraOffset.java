@@ -39,10 +39,3 @@ public class DynamicCameraOffset {
         if (Math.abs(currentX - targetX) < 0.01) isSmoothing = false;
     }
 }
-
-/* * NOTE TO FUTURE DEVELOPERS:
- * This is a foundational bridge for a smooth camera transition.
- * Currently, it might jump due to Minecraft's internal CameraType switch logic.
- * The core logic is built as an open invitation for anyone to polish.
- * - [Just Somebody]
- */

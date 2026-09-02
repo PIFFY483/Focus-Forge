@@ -38,7 +38,6 @@ public class CameraConfigScreen extends Screen {
         int width = 150;
         int spacing = 25;
 
-        // --- LEFT SIDE (Basic Camera Settings) ---
         this.addRenderableWidget(new FloatSlider(xLeft, y, width, "camera.config.shoulder_x", CameraViewConfig.SHOULDER_OFFSET_X.get(), -2.0, 2.0, (val) -> {
             CameraViewConfig.SHOULDER_OFFSET_X.set(val);
         }));
@@ -65,9 +64,6 @@ public class CameraConfigScreen extends Screen {
             CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.set(val);
         }));
 
-        // --- RIGHT SIDE (Lock-On and Zoom Settings) ---
-        // 1. Mode Button - 5 adımlı döngü:
-        // Classic -> Old Shoulder -> New Shoulder -> Semi Orbit -> Orbit -> (tekrar Classic)
         this.addRenderableWidget(Button.builder(
                         Component.translatable("camera.config.mode", Component.translatable(cameraModeLabelKey(currentCameraModeStep()))),
                         (btn) -> {
@@ -137,7 +133,6 @@ public class CameraConfigScreen extends Screen {
                         })
                 .bounds(xRight, y + (spacing * 6), width, 20).build());
 
-        // --- CROSSHAIR COLOR LIST AND BUTTON ---
         String[] colorKeys = {
                 "camera.config.crosshair_color.turquoise", "camera.config.crosshair_color.green",
                 "camera.config.crosshair_color.dark_blue", "camera.config.crosshair_color.red",
@@ -145,10 +140,9 @@ public class CameraConfigScreen extends Screen {
         };
 
         this.addRenderableWidget(Button.builder(
-                        // Shows the current color's name
                         Component.translatable("camera.config.crosshair_color", Component.translatable(colorKeys[CameraViewConfig.CROSSHAIR_COLOR_INDEX.get()])),
                         (btn) -> {
-                            // Advances the color index by one, wraps back to start after 5 (0,1,2,3,4)
+
                             int nextColor = (CameraViewConfig.CROSSHAIR_COLOR_INDEX.get() + 1) % 5;
 
                             CameraViewConfig.CROSSHAIR_COLOR_INDEX.set(nextColor);
@@ -158,9 +152,6 @@ public class CameraConfigScreen extends Screen {
                         })
                 .bounds(xRight, y + (spacing * 7), width, 20).build());
 
-        // Lock-on icon (crosshair) rendering now lives entirely in the shared
-        // BRS lock renderer, so both the "O" and "C" HUDs read/write the same
-        // settings and stay in sync. This opens that same settings screen.
         this.addRenderableWidget(Button.builder(
                         Component.translatable("screen.lockon.brs_lockon_settings.button"),
                         btn -> this.minecraft.setScreen(new LockOnConfigScreen(this)))
@@ -174,15 +165,6 @@ public class CameraConfigScreen extends Screen {
 
     }
 
-    /**
-     * Mode butonunun 5 adımlı döngüsü:
-     * 0) Classic       - ShoulderCamMode.OLD, omuz kamerası kapalı
-     * 1) Old Shoulder  - ShoulderCamMode.OLD, omuz kamerası açık (Focus Forge'un kendi sistemi)
-     * 2) New Shoulder  - ShoulderCamMode.NEW ("/ff new cam" ile aynı)
-     * 3) Semi Orbit    - ShoulderCamMode.NEW + SemiOrbitController ("/ff semiorbit cam" ile aynı)
-     * 4) Orbit         - ShoulderCamMode.NEW + OrbitCameraState.ORBIT ("/ff orbit cam" ile aynı)
-     * Döngü sona erdiğinde tekrar 0'a (Classic) döner.
-     */
     private static int currentCameraModeStep() {
         if (ShoulderCamMode.isOld()) {
             return CameraViewConfig.ENABLE_SHOULDER_CAM.get() ? 1 : 0;
@@ -208,7 +190,7 @@ public class CameraConfigScreen extends Screen {
     }
 
     private static void applyCameraModeStep(int step) {
-        // Adımlar arasında geçişte, önceki adımdan kalan durumları (orbit/semi orbit) temizle.
+
         SemiOrbitController.setEnabled(false);
         if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
             OrbitCameraState.requestExit();

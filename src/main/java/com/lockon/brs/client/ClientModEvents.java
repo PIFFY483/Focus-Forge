@@ -20,9 +20,7 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-        // Enerji barı overlay'i kullanıcı isteğiyle devre dışı bırakıldı (EnergyBarOverlay.java hâlâ mevcut,
-        // sadece HUD'a register edilmiyor). Geri istersen aşağıdaki satırı tekrar aç:
-        // event.registerAboveAll("brs_energy_bar", EnergyBarOverlay.INSTANCE);
+
         event.registerAboveAll("lockon_shoulder_cam_mode", ShoulderCamModeOverlay.INSTANCE);
         event.registerAboveAll("lockon_lock_type", LockTypeOverlay.INSTANCE);
     }

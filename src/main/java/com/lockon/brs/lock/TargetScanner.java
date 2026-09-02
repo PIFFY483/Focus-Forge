@@ -48,8 +48,6 @@ public class TargetScanner {
         LocalPlayer player = mc.player;
         if (player == null) return null;
 
-        // Her taramada tazele: config reload event'i her senaryoda tetiklenmeyebiliyor,
-        // Type 1 (Focus Forge) tarafı da bunu her çağrıda yapıyor, tutarlılık için aynısı burada da.
         refreshCache();
 
         double maxDist = LockOnConfig.MAX_LOCK_DISTANCE.get();

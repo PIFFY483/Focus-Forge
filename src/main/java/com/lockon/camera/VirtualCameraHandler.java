@@ -20,7 +20,6 @@ public class VirtualCameraHandler {
 
     @SubscribeEvent
     public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
-        // NEW shoulder cam (eski BRS) aktifken bu (OLD) sistem devre dışı kalır.
         if (ShoulderCamMode.isNew()) {
             lerpPos = Vec3.ZERO;
             return;
@@ -33,8 +32,6 @@ public class VirtualCameraHandler {
             return;
         }
 
-        // 1. KONTROL: Mod açık mı? (GUI deki butona bağlı)
-        // Eğer config'den kapatıldıysa veya FPV deysek kodun geri kalanını çalıştırma.
         if (mc.player == null || mc.options.getCameraType().isFirstPerson() ||
                 CameraStateManager.cameraMode != 1 || !CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {
 
@@ -45,7 +42,7 @@ public class VirtualCameraHandler {
         Camera camera = event.getCamera();
         float pt = (float) event.getPartialTick();
 
-        // 2. CONFIG DEN CANLI DEĞERLERİ ÇEKER
+        //  CONFIG DEN CANLI DEĞERLERİ ÇEKER
         // buradaki side, vert, back ve smoothness değerleri GUI'den ne seçersen o olacak
         double side = CameraViewConfig.SHOULDER_OFFSET_X.get();
         double vert = CameraViewConfig.SHOULDER_OFFSET_Y.get();
@@ -58,13 +55,13 @@ public class VirtualCameraHandler {
         float yawRad = yaw * (float)(Math.PI / 180.0);
         float pitchRad = pitch * (float)(Math.PI / 180.0);
 
-        // 4. OYUNCU POZİSYONU (Titreşim önleyici LERP)
+        // OYUNCU POZİSYONU
         double px = Mth.lerp(pt, mc.player.xo, mc.player.getX());
         double py = Mth.lerp(pt, mc.player.yo, mc.player.getY()) + mc.player.getEyeHeight();
         double pz = Mth.lerp(pt, mc.player.zo, mc.player.getZ());
         Vec3 eyePos = new Vec3(px, py, pz);
 
-        // 5. İDEAL KONUM VE DUVAR KONTROLÜ (Collision)
+        //İDEAL KONUM VE DUVAR KONTROLÜ (Collision)
         double offX = -Math.cos(yawRad) * side + Math.sin(yawRad) * Math.cos(pitchRad) * back;
         double offZ = -Math.sin(yawRad) * side - Math.cos(yawRad) * Math.cos(pitchRad) * back;
         double offY = vert + Math.sin(pitchRad) * back;
@@ -73,7 +70,7 @@ public class VirtualCameraHandler {
         HitResult hit = mc.level.clip(new ClipContext(eyePos, idealPos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, mc.player));
         Vec3 targetPos = hit.getType() == HitResult.Type.MISS ? idealPos : hit.getLocation().add(eyePos.subtract(idealPos).normalize().scale(0.15));
 
-        // 6. YUMUŞAK TAKİP (Burada GUI'den gelen lerpFactor kullanılıyor)
+        // YUMUŞAK TAKİP
         if (lerpPos.equals(Vec3.ZERO)) lerpPos = targetPos;
 
         lerpPos = new Vec3(
@@ -82,7 +79,7 @@ public class VirtualCameraHandler {
                 Mth.lerp(lerpFactor, lerpPos.z, targetPos.z)
         );
 
-        // 7. SONUÇLARI MIXIN İLE KAMERAYA GÖNDERİR
+        // SONUÇLARI MIXIN İLE KAMERAYA GÖNDER
         if (camera instanceof CameraMixinInterface mixinCamera) {
             mixinCamera.lockon$setCustomPosition(lerpPos);
         }

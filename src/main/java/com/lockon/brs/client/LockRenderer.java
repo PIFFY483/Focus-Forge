@@ -29,17 +29,23 @@ public class LockRenderer {
             return;
         }
 
-        // Durum kontrolü
-        boolean isLocked = LockState.isLocked();
-        boolean isPreview = mc.screen instanceof LockOnConfigScreen;
+        boolean isLocked;
+        LivingEntity target;
 
+        if (com.lockon.lock.LockType.isType1()) {
+            isLocked = com.lockon.lock.LockState.isLocked();
+            target = com.lockon.lock.LockState.getTarget();
+        } else {
+            isLocked = com.lockon.brs.lock.LockState.isLocked();
+            target = com.lockon.brs.lock.LockState.getTarget();
+        }
+
+        boolean isPreview = mc.screen instanceof LockOnConfigScreen;
         if (!isLocked && !isPreview) return;
 
-        // Stil kontrolü (0-6 arası geçerli, -1 veya 7+ kapalı)
         int style = LockOnConfig.CROSSHAIR_STYLE.get();
         if (style < 0 || style > 11) return;
 
-        LivingEntity target = LockState.getTarget();
         if (target == null && isPreview) {
             target = mc.player;
         }
@@ -48,7 +54,6 @@ public class LockRenderer {
         PoseStack poseStack = event.getPoseStack();
         Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
 
-        // Pozisyon hesabı (partialTick ile smooth)
         double x = Mth.lerp(event.getPartialTick(), target.xo, target.getX()) - cameraPos.x;
         double z = Mth.lerp(event.getPartialTick(), target.zo, target.getZ()) - cameraPos.z;
         double baseTargetY = Mth.lerp(event.getPartialTick(), target.yo, target.getY());
@@ -221,8 +226,8 @@ public class LockRenderer {
                 }
             }
 
-            case 7 -> { // BLACK STAR — Rock Cannon enerji patlaması
-                // 1. Dış kesikli halka (8 segment)
+            case 7 -> {
+
                 for (int i = 0; i < 8; i++) {
                     float a1 = (float) Math.toRadians(i * 45 + 10);
                     float a2 = (float) Math.toRadians(i * 45 + 35);
@@ -231,7 +236,7 @@ public class LockRenderer {
                             Mth.cos(a2) * size * 1.1f, Mth.sin(a2) * size * 1.1f,
                             r, g, b, a * 0.6f);
                 }
-                // 2. İç düz halka
+
                 for (int i = 0; i < 12; i++) {
                     float a1 = (float) Math.toRadians(i * 30);
                     float a2 = (float) Math.toRadians(i * 30 + 20);
@@ -240,7 +245,7 @@ public class LockRenderer {
                             Mth.cos(a2) * size * 0.5f, Mth.sin(a2) * size * 0.5f,
                             r, g, b, a * 0.8f);
                 }
-                // 3. Dört ana uzun ışın (kardinal yönler)
+
                 float outerRay = size * 1.3f;
                 float innerRay = size * 0.7f;
                 for (int i = 0; i < 4; i++) {
@@ -250,7 +255,7 @@ public class LockRenderer {
                             Mth.cos(angle) * outerRay, Mth.sin(angle) * outerRay,
                             r, g, b, a);
                 }
-                // 4. Dört kısa ara ışın (diyagonal)
+
                 float shortOuter = size * 0.9f;
                 float shortInner = size * 0.55f;
                 for (int i = 0; i < 4; i++) {
@@ -260,15 +265,15 @@ public class LockRenderer {
                             Mth.cos(angle) * shortOuter, Mth.sin(angle) * shortOuter,
                             r, g, b, a * 0.7f);
                 }
-                // 5. İkincil iç halka (parlayan merkez)
+
                 float d2 = 0.035F;
                 drawLine(builder, matrix, -d2, -d2, d2, -d2, r, g, b, a);
                 drawLine(builder, matrix, d2, -d2, d2, d2, r, g, b, a);
                 drawLine(builder, matrix, d2, d2, -d2, d2, r, g, b, a);
                 drawLine(builder, matrix, -d2, d2, -d2, -d2, r, g, b, a);
             }
-            case 8 -> { // CANNON SIGHT — Rock Cannon nişangahı (mil-dot)
-                // 1. Dış kalın halka (tam daire, 16 segment)
+            case 8 -> {
+
                 for (int i = 0; i < 16; i++) {
                     float a1 = (float) Math.toRadians(i * 22.5);
                     float a2 = (float) Math.toRadians((i + 1) * 22.5);
@@ -277,7 +282,7 @@ public class LockRenderer {
                             Mth.cos(a2) * size, Mth.sin(a2) * size,
                             r, g, b, a);
                 }
-                // 2. Mil-dot noktaları (saat pozisyonlarında)
+
                 float dotR = size * 1.15f;
                 float dot = 0.015F;
                 for (int i = 0; i < 12; i++) {
@@ -287,14 +292,14 @@ public class LockRenderer {
                     drawLine(builder, matrix, dx - dot, dy, dx + dot, dy, r, g, b, a);
                     drawLine(builder, matrix, dx, dy - dot, dx, dy + dot, r, g, b, a);
                 }
-                // 3. Çapraz çizgiler (merkeze değmeyen, köşelerden)
+
                 float gap = size * 0.25f;  // Merkeze boşluk
                 float ext = size * 0.85f;  // Dışa uzanma
                 drawLine(builder, matrix, gap, gap, ext, ext, r, g, b, a);
                 drawLine(builder, matrix, -gap, gap, -ext, ext, r, g, b, a);
                 drawLine(builder, matrix, gap, -gap, ext, -ext, r, g, b, a);
                 drawLine(builder, matrix, -gap, -gap, -ext, -ext, r, g, b, a);
-                // 4. Dört hedef kutusu (merkeze yakın)
+
                 float boxR = size * 0.45f;
                 float bS = 0.018F;
                 for (int i = 0; i < 4; i++) {
@@ -307,17 +312,16 @@ public class LockRenderer {
                     drawLine(builder, matrix, bx - bS, by + bS, bx - bS, by - bS, r, g, b, a * 0.9f);
                 }
             }
-            case 9 -> { // BLADE MARK — Black Blade kesik izi
-                // 1. İki çapraz kesik (X şeklinde, kalın uçlu, keskin)
+            case 9 -> {
+
                 float cutLen = size * 1.1f;
                 float cutStart = size * 0.15f;
-                // Sol üst → sağ alt
+
                 drawLine(builder, matrix, -cutLen, -cutLen, -cutStart, -cutStart, r, g, b, a);
                 drawLine(builder, matrix, cutStart, cutStart, cutLen, cutLen, r, g, b, a);
-                // Sağ üst → sol alt
                 drawLine(builder, matrix, cutLen, -cutLen, cutStart, -cutStart, r, g, b, a);
                 drawLine(builder, matrix, -cutStart, cutStart, -cutLen, cutLen, r, g, b, a);
-                // 2. Kan damlaları (kesik uçlarında küçük noktalar)
+
                 float dropR = 0.025F;
                 float[][] dropPoints = {
                         {-cutLen, -cutLen}, {cutLen, cutLen},
@@ -330,13 +334,13 @@ public class LockRenderer {
                     drawLine(builder, matrix, p[0] - dropR * 0.7f, p[1] - dropR * 0.7f,
                             p[0] + dropR * 0.7f, p[1] + dropR * 0.7f, r, g, b, a * 0.8f);
                 }
-                // 3. Dış çerçeve (köşeleri kesik kare)
+
                 float frame = size * 1.3f;
                 float cut = size * 0.35f;
-                // Üst kenar (iki parça, ortası açık)
+
                 drawLine(builder, matrix, -frame, -frame, -frame + cut, -frame, r, g, b, a * 0.5f);
                 drawLine(builder, matrix, frame - cut, -frame, frame, -frame, r, g, b, a * 0.5f);
-                // Alt kenar
+
                 drawLine(builder, matrix, -frame, frame, -frame + cut, frame, r, g, b, a * 0.5f);
                 drawLine(builder, matrix, frame - cut, frame, frame, frame, r, g, b, a * 0.5f);
                 // Sol kenar
@@ -345,7 +349,7 @@ public class LockRenderer {
                 // Sağ kenar
                 drawLine(builder, matrix, frame, -frame, frame, -frame + cut, r, g, b, a * 0.5f);
                 drawLine(builder, matrix, frame, frame - cut, frame, frame, r, g, b, a * 0.5f);
-                // 4. İç "tehlike" üçgeni (küçük, merkeze yakın)
+
                 float triR = size * 0.2f;
                 for (int i = 0; i < 3; i++) {
                     float a1 = (float) Math.toRadians(i * 120 - 90);
@@ -357,10 +361,9 @@ public class LockRenderer {
                 }
             }
 
-            case 10 -> { // DEATH SKULL — BRS kuru kafatası
+            case 10 -> { // DEATH SKULL
                 float s = size * 1.2f; // Genel ölçek
 
-                // 1. KAFA KUBBESİ (üst yarım daire, 8 segment)
                 for (int i = 0; i < 8; i++) {
                     float a1 = (float) Math.toRadians(180 + i * 22.5);
                     float a2 = (float) Math.toRadians(180 + (i + 1) * 22.5);
@@ -370,7 +373,7 @@ public class LockRenderer {
                             r, g, b, a);
                 }
 
-                // 2. YANAK KEMİKLERİ (kubbeden çeneye inen eğriler)
+
                 // Sol yanak
                 drawLine(builder, matrix, -s * 0.95f, -s * 0.1f, -s * 0.85f, s * 0.3f, r, g, b, a);
                 drawLine(builder, matrix, -s * 0.85f, s * 0.3f, -s * 0.55f, s * 0.55f, r, g, b, a);
@@ -378,7 +381,6 @@ public class LockRenderer {
                 drawLine(builder, matrix, s * 0.95f, -s * 0.1f, s * 0.85f, s * 0.3f, r, g, b, a);
                 drawLine(builder, matrix, s * 0.85f, s * 0.3f, s * 0.55f, s * 0.55f, r, g, b, a);
 
-                // 3. GÖZ ÇUKURLARI (iki kare, hafif eğik — tehditkar)
                 float eyeW = s * 0.28f;
                 float eyeH = s * 0.25f;
                 float eyeY = -s * 0.05f;
@@ -394,7 +396,6 @@ public class LockRenderer {
                 drawLine(builder, matrix, eyeX - eyeW, eyeY + eyeH * 0.7f, eyeX + eyeW, eyeY + eyeH * 0.9f, r, g, b, a);
                 drawLine(builder, matrix, eyeX + eyeW, eyeY + eyeH * 0.9f, eyeX + eyeW, eyeY - eyeH * 0.8f, r, g, b, a);
 
-                // 4. BURUN (ters üçgen — kafatası klasiği)
                 float noseTop = s * 0.2f;
                 float noseBot = s * 0.38f;
                 float noseW = s * 0.12f;
@@ -404,7 +405,6 @@ public class LockRenderer {
                 // Burun bölmesi (dikey çizgi)
                 drawLine(builder, matrix, 0, noseTop + s * 0.05f, 0, noseBot, r, g, b, a * 0.5f);
 
-                // 5. ÇENE VE DİŞLER (alt kenar + 5 dikey çizgi)
                 float jawY = s * 0.55f;
                 float jawBot = s * 0.8f;
                 float jawW = s * 0.55f;
@@ -414,14 +414,13 @@ public class LockRenderer {
                 drawLine(builder, matrix, -jawW, jawBot, jawW, jawBot, r, g, b, a);
                 // Üst dudak çizgisi
                 drawLine(builder, matrix, -jawW, jawY, jawW, jawY, r, g, b, a * 0.7f);
-                // 5 diş (dikey çizgiler)
+
                 float toothW = jawW * 2.0f / 5.0f;
                 for (int i = 1; i < 5; i++) {
                     float tx = -jawW + toothW * i;
                     drawLine(builder, matrix, tx, jawY + s * 0.02f, tx, jawBot - s * 0.02f, r, g, b, a * 0.6f);
                 }
 
-                // 6. ALIN ÇATLAĞI (detay — BRS'nin hasar görmüş hissi)
                 drawLine(builder, matrix, -s * 0.1f, -s * 0.85f, 0, -s * 0.55f, r, g, b, a * 0.5f);
                 drawLine(builder, matrix, 0, -s * 0.55f, s * 0.15f, -s * 0.4f, r, g, b, a * 0.5f);
                 drawLine(builder, matrix, s * 0.15f, -s * 0.4f, s * 0.05f, -s * 0.25f, r, g, b, a * 0.5f);
@@ -430,7 +429,6 @@ public class LockRenderer {
             case 11 -> { // BRS SIGIL — Runik koruma sembolü
                 float s = size * 1.1f;
 
-                // 1. İÇ İÇE 2 ÜÇGEN (merkez, yukarı bakan)
                 // Dış üçgen
                 float triOuter = s * 0.55f;
                 for (int i = 0; i < 3; i++) {

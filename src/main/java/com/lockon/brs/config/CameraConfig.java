@@ -23,19 +23,12 @@ public class CameraConfig {
     public static final ForgeConfigSpec.DoubleValue TRANSITION_SPEED;
     public static final ForgeConfigSpec.BooleanValue ENABLE_SMOOTH_TRANSITION;
 
-    // ── OTO HİZALAMA (DİNAMİK Y) ──
+    //OTO HİZALAMA (DİNAMİK Y)
     public static final ForgeConfigSpec.BooleanValue ENABLE_DYNAMIC_Y_OFFSET;
     public static final ForgeConfigSpec.DoubleValue DYNAMIC_Y_FACTOR;
 
-    // ── LOCK-ON: KAMERA KENDİ TAKİP HIZI (SOULS-LIKE AYRIMI) ──
-    // Karakterin/nişangahın hedefe dönüş hızından (LockOnConfig.LOCK_SPEED) bağımsız:
-    // kilit varken kameranın FİZİKSEL pozisyonu nişanı bu hızla "geriden" takip eder.
     public static final ForgeConfigSpec.DoubleValue CAMERA_FOLLOW_SPEED;
 
-    // ── DUVAR ÇARPIŞMASI SONRASI GERİ TOPARLANMA ──
-    // Kamera bir engele çarptığında YAKLAŞMA her zaman hızlı/anlık kalır (aksi halde
-    // duvarın içinden görünür - clip sorunu). Ama engelden UZAKLAŞIRKEN (kamera geri
-    // toparlanırken) bu hızla, daha yumuşak bir geçiş sağlar.
     public static final ForgeConfigSpec.DoubleValue COLLISION_RECOVERY_SPEED;
 
 
@@ -148,7 +141,7 @@ public class CameraConfig {
                     .comment("FPV <-> TPV arasi yumusak gecis (kapatilirsa aninda gecis)")
                     .define("enableSmoothTransition", true);
 
-            // ── OTO HİZALAMA SEÇENEKLERİ ──
+            //  OTO HİZALAMA SEÇENEKLERİ
             this.enableDynamicYOffset = builder
                     .comment("Mesafe arttikca Y yuksekligini otomatik dengele (Kadraj Hizalama)")
                     .define("enableDynamicYOffset", true);
@@ -157,14 +150,14 @@ public class CameraConfig {
                     .comment("Geriye acilma miktarina gore ekstra Y artis orani")
                     .defineInRange("dynamicYFactor", 0.20, 0.0, 1.0);
 
-            // ── LOCK-ON KAMERA TAKİP HIZI ──
+            // LOCK-ON KAMERA TAKİP HIZI
             this.cameraFollowSpeed = builder
                     .comment("Lock-on aktifken kameranin, karakterin nisan hizindan bagimsiz " +
                             "kendi takip hizi. Dusuk = agir/sinematik kamera lag'i (souls-like). " +
                             "Yuksek (1.0) = kamera nisani aninda takip eder.")
                     .defineInRange("cameraFollowSpeed", 0.15, 0.01, 1.0);
 
-            // ── DUVAR ÇARPIŞMASI SONRASI GERİ TOPARLANMA ──
+            // DUVAR ÇARPIŞMASI SONRASI GERİ TOPARLANMA
             this.collisionRecoverySpeed = builder
                     .comment("Kamera bir engele carpip geri cekildikten sonra normale donerken " +
                             "kullanilan yumusatma hizi. Engele YAKLASMA her zaman anlik kalir " +

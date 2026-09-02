@@ -26,7 +26,7 @@ public class OrbitCameraConfigScreen extends Screen {
         int centerX = this.width / 2;
         int y = 30;
 
-        // ── Orbit Camera On/Off ──
+        //  Orbit Camera
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_ORBIT_CAMERA.get())
                 .create(centerX - 100, y, 200, 20,
@@ -37,7 +37,6 @@ public class OrbitCameraConfigScreen extends Screen {
                         }));
         y += 30;
 
-        // ── Orbit Distance ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
                 "camera.config.orbit_distance",
@@ -48,7 +47,6 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Orbit Height ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
                 "camera.config.orbit_height",
@@ -59,7 +57,7 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Transition Speed ──
+        //Transition Speed
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
                 "camera.config.transition_speed",
@@ -70,7 +68,7 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Auto Rotate ──
+        //Auto Rotate
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
                 "camera.config.auto_rotate_speed",
@@ -81,14 +79,13 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 35;
 
-        // ── Info Line ──
         this.addRenderableWidget(Button.builder(
                 Component.translatable("camera.config.orbit_key_hint"),
                 btn -> {}
         ).bounds(centerX - 100, y, 200, 20).build());
         y += 25;
 
-        // ── Reset to Defaults ──
+        // Reset to Defaults
         this.addRenderableWidget(Button.builder(
                 Component.translatable("gui.lockon.reset_to_defaults"),
                 btn -> {
@@ -113,7 +110,7 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Back ──
+        //  Back
         this.addRenderableWidget(Button.builder(
                 Component.translatable("gui.lockon.back"),
                 btn -> this.onClose()

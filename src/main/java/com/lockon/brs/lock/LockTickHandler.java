@@ -23,7 +23,6 @@ public class LockTickHandler {
         if (event.phase != TickEvent.Phase.START) return;
         if (mc.player == null || mc.level == null) return;
 
-        // --- Lock Type 1 (Focus Forge) aktifken bu sistem (Lock Type 2) devre dışı ---
         if (!com.lockon.lock.LockType.isType2()) {
             if (LockState.isLocked()) {
                 LockState.unlock();

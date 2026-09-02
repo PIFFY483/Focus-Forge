@@ -43,10 +43,6 @@ public class CrosshairTargetHelper {
         return hit.getType() == HitResult.Type.MISS ? endPos : hit.getLocation();
     }
 
-    /**
-     * Merminin çıkış noktasını (Kamera Pozisyonu) döndürür.
-     * Hata veren eksik metod buydu.
-     */
     public static Vec3 getMuzzlePosition() {
         return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
     }

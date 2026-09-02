@@ -17,10 +17,7 @@ public class LockOnConfig {
     public static final ForgeConfigSpec.DoubleValue MAX_LOCK_ANGLE;
     public static final ForgeConfigSpec.DoubleValue MAX_VERTICAL_OFFSET;
     public static final ForgeConfigSpec.DoubleValue CAMERA_FOCUS_OFFSET;
-    // Dinamik odak yukseklik orani artik ayri bir BRS ayari degil; Focus Forge'un
-    // kendi lock sisteminin (TYPE_1) "o" tusuyla acilan kamera ayarlari HUD'undaki
-    // ortak degeri kullaniliyor, boylece iki lock type de ayni yuzde ile buyuk
-    // moblara odaklaniyor. Bkz. com.lockon.config.CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD
+
     public static final ForgeConfigSpec.DoubleValue LOCK_SPEED;
     public static final ForgeConfigSpec.DoubleValue MAX_SMOOTHING_FACTOR;
     public static final ForgeConfigSpec.DoubleValue UNLOCK_COOLDOWN_SECONDS;
@@ -45,7 +42,7 @@ public class LockOnConfig {
     public static final ForgeConfigSpec.IntValue CROSSHAIR_COLOR_INDEX;
     public static final ForgeConfigSpec.DoubleValue ICON_Y_OFFSET;
 
-    // ── DİNAMİK LOCK-ON KAMERA MESAFESİ (FOV Framing) ──
+    // DİNAMİK LOCK-ON KAMERA MESAFESİ (FOV Framing)
     public static final ForgeConfigSpec.BooleanValue ENABLE_DYNAMIC_LOCK_DISTANCE;
     public static final ForgeConfigSpec.DoubleValue FRAME_MARGIN;
     public static final ForgeConfigSpec.DoubleValue MIN_LOCK_CAMERA_DISTANCE;
@@ -53,9 +50,7 @@ public class LockOnConfig {
     public static final ForgeConfigSpec.DoubleValue LOCK_DISTANCE_SMOOTH_SPEED;
     public static final ForgeConfigSpec.DoubleValue LOCK_DISTANCE_MAX_STEP_PER_TICK;
 
-    // ── LOCK MESAFESİ ARTIŞINA/AZALIŞINA BAĞLI Y OFFSET ──
-    // Genel "Oto Y Hizalama" (CameraConfig.ENABLE_DYNAMIC_Y_OFFSET) sisteminden BAĞIMSIZ:
-    // sadece lock-on'un kamerayı normal mesafenin ötesine ittiği KADAR (delta) Y'yi ayarlar.
+    //  LOCK MESAFESİ ARTIŞINA/AZALIŞINA BAĞLI Y OFFSET
     public static final ForgeConfigSpec.BooleanValue ENABLE_LOCK_DISTANCE_Y_OFFSET;
     public static final ForgeConfigSpec.DoubleValue LOCK_DISTANCE_Y_FACTOR;
 
@@ -77,7 +72,7 @@ public class LockOnConfig {
         BREAK_LOCK_ON_LOS_BREAK = CLIENT.breakLockOnLosBreak;
         TARGET_PLAYERS = CLIENT.targetPlayers;
         // ENABLE_TARGET_BLACKLIST / TARGET_BLACKLIST / LOCK_ACQUISITION_BLOCK_LIST / LOCK_PRECLUSION_BLOCK_LIST
-        // artık SharedListConfig'ten geliyor (alan tanımında alias edildi).
+        // artık SharedListConfigten geliyor (alan tanımında alias edildi).
         TARGET_SCAN_FREQUENCY = CLIENT.targetScanFrequency;
         ENABLE_VIGNETTE = CLIENT.enableVignette;
         CROSSHAIR_STYLE = CLIENT.crosshairStyle;
@@ -108,8 +103,7 @@ public class LockOnConfig {
         public final ForgeConfigSpec.DoubleValue targetSwitchCooldownSeconds;
         public final ForgeConfigSpec.BooleanValue breakLockOnLosBreak;
         public final ForgeConfigSpec.BooleanValue targetPlayers;
-        // enableTargetBlacklist / targetBlacklist / lockAcquisitionBlockList / lockPreclusionBlockList
-        // artık SharedListConfig'te (ortak).
+
         public final ForgeConfigSpec.IntValue targetScanFrequency;
         public final ForgeConfigSpec.BooleanValue enableVignette;
         public final ForgeConfigSpec.IntValue crosshairStyle;
@@ -178,8 +172,7 @@ public class LockOnConfig {
                     .comment("Oyuncuları hedef olarak kabul et")
                     .define("targetPlayers", true);
 
-            // enableTargetBlacklist / targetBlacklist / lockAcquisitionBlockList / lockPreclusionBlockList
-            // artık OLD ve NEW kamera modları arasında ORTAK — bkz. com.lockon.shared.config.SharedListConfig.
+
 
             this.targetScanFrequency = builder
                     .comment("Hedef tarama frekansı (tick)")
@@ -213,7 +206,7 @@ public class LockOnConfig {
 
             builder.pop();
 
-            // ── DİNAMİK LOCK-ON KAMERA MESAFESİ ──
+            //  DİNAMİK LOCK-ON KAMERA MESAFESİ
             builder.push("dynamic_lock_distance");
 
             this.enableDynamicLockDistance = builder
@@ -249,7 +242,7 @@ public class LockOnConfig {
                             "yüksek değer: daha hızlı ama daha az yumuşak tepki.")
                     .defineInRange("lockDistanceMaxStepPerTick", 0.12, 0.01, 2.0);
 
-            // ── LOCK MESAFESİ ARTIŞINA/AZALIŞINA BAĞLI Y OFFSET ──
+            // LOCK MESAFESİ ARTIŞINA/AZALIŞINA BAĞLI Y OFFSET
             this.enableLockDistanceYOffset = builder
                     .comment("Lock-on kamerayı geri ittikçe (veya normal mesafeye yaklaştırdıkça) " +
                             "Y yüksekliğini de aynı oranda otomatik ayarla. " +

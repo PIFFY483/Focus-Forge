@@ -17,15 +17,11 @@ public class CameraStateManager {
     private static int alignmentTicks = 0;
 
     public static boolean isShoulderCamActuallyActive(Minecraft mc) {
-        // 1. Ayarlardan omuz kamerası tamamen kapalı mı?
+
         if (!CameraViewConfig.ENABLE_SHOULDER_CAM.get()) return false;
 
-        // 2. Oyuncu birinci şahıs (First Person) modunda mı?
-        // Minecraft'ta 0: First Person, 1: Third Person Back, 2: Third Person Front
-        // Omuz kamerası sadece Third Person modlarında çalışmalı (tercihen sadece 1)
         if (mc.options.getCameraType().isFirstPerson()) return false;
 
-        // 3. Bizim omuz kamerası modu "Hidden" değilse (modeNames'teki 0. index)
         return CameraStateManager.cameraMode > 0;
     }
 
@@ -38,7 +34,7 @@ public class CameraStateManager {
 
     public static void onLockStart(Minecraft mc, Entity target) {
         lockedTarget = target;
-        alignmentTicks = 6; // Yaklaşık 0.3 saniye (20 tick = 1 sn ise 6 tick uygundur)
+        alignmentTicks = 6;
         if (mc.player != null) {
             finalYaw = mc.player.getYRot(); // Başlangıç açısını sabitle
             finalPitch = mc.player.getXRot();
@@ -65,15 +61,11 @@ public class CameraStateManager {
             mc.player.xRotO = currentPitch;
 
             // 2. ADIM: MOUSE SIFIRLAMA
-            // Minecraft'ın farenin ne kadar döndüğünü hesapladığı o "birikmiş" veriyi temizliyoruz.
-            // Bazı sürümlerde mouseHandler.accumulatedDX/DY değişkenlerine erişilemiyebilir,
-            // bu yüzden en garanti yöntem fareyi anlık olarak "serbest bırakıp tekrar yakalamaktır"
-            // ya da oyuncunun dönme hızını (delta) sıfırla.
 
             mc.mouseHandler.releaseMouse();
             mc.mouseHandler.grabMouse();
 
-            // Eğer release/grab çok sert gelirse, oyuncunun input değerlerini sıfırlıyoruz:
+            // Eğer release/grab çok sert gelirse, oyuncunun input değerlerini sıfırla
             mc.player.input.leftImpulse = 0;
             mc.player.input.forwardImpulse = 0;
         }
@@ -140,17 +132,16 @@ public class CameraStateManager {
             targetPitch = (float) (-Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
             targetPitch = Mth.clamp(targetPitch, -40.0F, 40.0F);
 
-            // --- YENİ SİNEMATİK TAKİP MANTIĞI BAŞLANIÇI ---
             float currentLerp = getSmoothness();
 
-            // 1. Mesafe Freni: Mob 5 bloktan yakındaysa hızı mesafeye oranla %50'ye kadar düşürür
+            //  Mesafe Freni: Mob 5 bloktan yakındaysa hızı mesafeye oranla %50
             float distance = mc.player.distanceTo(lockedTarget);
             if (distance < 5.0f) {
                 float distanceFactor = Mth.clamp(distance / 5.0f, 0.5f, 1.0f);
                 currentLerp *= distanceFactor;
             }
 
-            // 2. Açısal Basamak (Stepping): Kare başına max dönüşü kısıtlar (Titremeyi bitiren ana nokta)
+            //  Açısal Basamak (Stepping): Kare başına max dönüşü kısıtlar (Titremeyi bitiren ana nokta)
             float yawDiff = Mth.wrapDegrees(targetYaw - finalYaw);
             float pitchDiff = targetPitch - finalPitch;
 
@@ -163,7 +154,6 @@ public class CameraStateManager {
 
             finalYaw += stepYaw;
             finalPitch += stepPitch;
-            // --- YENİ SİNEMATİK TAKİP MANTIĞI BİTİŞİ ---
 
         } else {
             targetYaw = mc.player.getYRot();
@@ -175,7 +165,7 @@ public class CameraStateManager {
             finalPitch = Mth.lerp(currentLerp, finalPitch, targetPitch);
         }
 
-        // 4. UYGULAMA VE BLOKE
+        // UYGULAMA VE BLOKE
         if (lockedTarget != null || unlockTimer > 0) {
             finalYaw = Mth.wrapDegrees(finalYaw);
             applyAbsoluteForce(mc.player, finalYaw, finalPitch);
@@ -183,21 +173,20 @@ public class CameraStateManager {
     }
 
     private static void applyAbsoluteForce(net.minecraft.client.player.LocalPlayer player, float yaw, float pitch) {
-        // 1. MEVCUT KARE (Current Frame)
         player.setYRot(yaw);
         player.setXRot(pitch);
 
-        // 2. ÖNCEKİ KARE (Previous Frame - partialTicks etkisini sıfırlar)
+        //  ÖNCEKİ KARE
         player.yRotO = yaw;
         player.xRotO = pitch;
 
-        // 3. KAFA VE VÜCUT (Senkronizasyon)
+        //  KAFA VE VÜCUT
         player.setYHeadRot(yaw);
         player.yHeadRotO = yaw;
         player.yBodyRot = yaw;
         player.yBodyRotO = yaw;
 
-        // 4. ÇİFTE KİLİT (Bazı motor güncellemelerini yakalamak için tekrarlar)
+        //  ÇİFTE KİLİT
         player.setYRot(yaw);
         player.setXRot(pitch);
     }

@@ -54,7 +54,7 @@ public class LockOnConfigScreen extends Screen {
 
         int y = 22; // 30 → 22 (reduced top spacing)
 
-        // ── LOCK MECHANISM ──
+        // LOCK MECHANISM
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.brs.title.lock_mechanism")));
         y += ROW_HEIGHT - TITLE_GAP;
 
@@ -87,7 +87,7 @@ public class LockOnConfigScreen extends Screen {
                 LockOnConfig.TARGET_SWITCH_COOLDOWN_SECONDS.get(), 0.0, 10.0, 2, v -> LockOnConfig.TARGET_SWITCH_COOLDOWN_SECONDS.set(v)));
         y += ROW_HEIGHT + 6;
 
-        // ── TARGETING ──
+        // TARGETING
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.brs.title.targeting")));
         y += ROW_HEIGHT - TITLE_GAP;
 
@@ -105,7 +105,7 @@ public class LockOnConfigScreen extends Screen {
                         (b, v) -> LockOnConfig.BREAK_LOCK_ON_LOS_BREAK.set(v)));
         y += ROW_HEIGHT + 6;
 
-        // ── BLOCK LISTS ──
+        // BLOCK LISTS
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.brs.title.block_lists")));
         y += ROW_HEIGHT - TITLE_GAP;
 
@@ -130,7 +130,7 @@ public class LockOnConfigScreen extends Screen {
 
         y += ROW_HEIGHT + 6;
 
-        // ── VISUAL ──
+        // VISUAL
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.brs.title.visuals")));
         y += ROW_HEIGHT - TITLE_GAP;
 
@@ -160,17 +160,14 @@ public class LockOnConfigScreen extends Screen {
                 v -> LockOnConfig.ICON_Y_OFFSET.set(v)));
         y += ROW_HEIGHT + 6;
 
-        // ── CAMERA (dynamic lock-on distance settings - separate sub-screen) ──
         this.addRenderableWidget(new TitleWidget(this.width / 2, y, Component.translatable("lockon.config.brs.title.camera")));
         y += ROW_HEIGHT - TITLE_GAP;
 
-        // Row 7 — single button, routes to sub-screen (same pattern as Block List / Entity Blacklist)
         this.addRenderableWidget(Button.builder(Component.translatable("lockon.config.brs.button.dynamic_camera_distance"), button -> {
             this.minecraft.setScreen(new DynamicLockDistanceConfigScreen(this));
         }).bounds(xCol1, y, BUTTON_WIDTH + BUTTON_WIDTH + COL_GAP, BUTTON_HEIGHT).build());
         y += ROW_HEIGHT + 12;
 
-        // ── Done Button — anchored to content end rather than a fixed bottom position; avoids overlap on small windows ──
         int doneY = Math.max(y, this.height - 30);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             this.onClose();
@@ -189,7 +186,7 @@ public class LockOnConfigScreen extends Screen {
         this.minecraft.setScreen(this.parent);
     }
 
-    // ── Custom Widgets ──
+    //  Custom Widgets
     private static class TitleWidget extends AbstractWidget {
         public TitleWidget(int x, int y, Component title) {
             super(x - 80, y, 160, 14, title);
