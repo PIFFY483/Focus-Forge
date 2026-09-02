@@ -49,6 +49,11 @@ public class ClientEvents {
         ScreenShakeController.tick(scaledDeltaSeconds);
         FovController.tick(scaledDeltaSeconds);
 
+        // ── Semi Orbit: durgun/hareket durumuna göre otomatik orbit <-> omuz ──
+        if (com.lockon.camera.ShoulderCamMode.isNew()) {
+            SemiOrbitController.tick(mc, frameDeltaTicks);
+        }
+
         // Kamera update
         if (LockState.isLocked() || CameraStateManager.lockedTarget != null) {
             float partialTick = mc.getFrameTime();
@@ -65,10 +70,11 @@ public class ClientEvents {
                 mc.setScreen(new CameraConfigScreen(null));
             }
         }
-        // ALT: artık SADECE 2 adımlı bir döngü - New Camera (shoulder, BRS) <-> Orbit.
-        // Old Camera bu döngünün tamamen dışında tutuluyor; Old'a sadece "/ff old cam"
-        // komutuyla geçilebiliyor ve Old moddayken ALT hiçbir şeyi değiştirmiyor
-        // (bkz. com.lockon.brs.client.FFCommand - /ff old cam, /ff new cam, /ff orbit cam).
+        // ALT: artık 3 adımlı bir döngü - New Camera (shoulder, BRS) -> Semi Orbit
+        // -> Orbit -> tekrar New. Old Camera bu döngünün tamamen dışında tutuluyor;
+        // Old'a sadece "/ff old cam" komutuyla geçilebiliyor ve Old moddayken ALT
+        // hiçbir şeyi değiştirmiyor (bkz. com.lockon.brs.client.FFCommand -
+        // /ff old cam, /ff new cam, /ff semiorbit cam, /ff orbit cam, /ff close).
         if (KeyBindings.ORBIT_TOGGLE_KEY.consumeClick()) {
             if (mc.screen == null && mc.player != null) {
                 if (com.lockon.camera.ShoulderCamMode.isOld()) {
@@ -76,15 +82,23 @@ public class ClientEvents {
                     return;
                 }
 
-                boolean isOrbitMode = OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT;
-
+                // ALT elle basıldıysa Semi Orbit'in otomatik kontrolünü iptal et,
+                // manuel toggle önceliklidir.
+                // 3 adımlı döngü: 1) New (Shoulder)  2) Semi Orbit  3) Orbit  -> tekrar 1)
                 String label;
-                if (!isOrbitMode) {
-                    OrbitCameraState.toggle(); // NEW -> ORBIT
+                if (SemiOrbitController.isEnabled()) {
+                    // 2) Semi Orbit -> 3) Orbit
+                    SemiOrbitController.setEnabled(false);
+                    OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
                     label = "Orbit Camera";
-                } else {
-                    OrbitCameraState.toggle(); // ORBIT -> NEW (smooth çıkış)
+                } else if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
+                    // 3) Orbit -> 1) New (Shoulder)
+                    OrbitCameraState.requestExit();
                     label = "New Camera (Shoulder)";
+                } else {
+                    // 1) New (Shoulder) -> 2) Semi Orbit
+                    SemiOrbitController.setEnabled(true);
+                    label = "Semi Orbit Camera";
                 }
                 mc.player.displayClientMessage(Component.literal("Camera Mode: " + label), true);
             }

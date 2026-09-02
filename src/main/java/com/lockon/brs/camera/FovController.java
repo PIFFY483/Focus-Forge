@@ -5,21 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 
-/**
- * FovController
- *
- * Dinamik FOV yöneticisi.
- * - Modifier tabanlı: Her sistem (dash, sprint, charge, hitstop) kendi modifier'ını ekler.
- * - Zoom in/out: Pozitif değer FOV'u genişletir (hız hissi), negatif değer daraltır (zoom/odaklanma).
- * - Smooth entry/exit: Ani sıçramalar olmaz, exponential smoothing ile yumuşak geçer.
- * - Otomatik temizlik: Süresi dolan modifier'lar otomatik silinir.
- * - FPS bağımsız.
- *
- * Kullanım:
- *   FovController.addModifier("dash", 15.0f, 0.5f);    // 0.5 saniye boyunca FOV +15
- *   FovController.addModifier("sniper_zoom", -20.0f, 0); // Kalıcı zoom (0 = sonsuz)
- *   FovController.addPunch(-8.0f, 0.3f);               // Vuruş anında kısa FOV punch
- */
 public class FovController {
 
     // ── Modifier Depolama ──
@@ -64,13 +49,6 @@ public class FovController {
     //  GİRİŞ NOKTALARI (API)
     // ══════════════════════════════════════════════════════
 
-    /**
-     * FOV modifier ekle.
-     *
-     * @param id       Benzersiz kimlik (örn: "dash", "charge_shot", "hitstop_test")
-     * @param amount   FOV değişimi. Pozitif = genişlet, Negatif = daralt (zoom).
-     * @param duration Saniye cinsinden süre. <= 0 verirsen kalıcı olur.
-     */
     public static void addModifier(String id, float amount, float duration) {
         activeModifiers.put(id, new FovModifier(amount, duration));
     }

@@ -48,12 +48,6 @@ public class VirtualCameraHandler {
     // ── Saf FPV'de shake'in pozisyon değil açı-jitter'ı olarak uygulanma çarpanı ──
     private static final float FPV_SHAKE_ANGLE_SCALE = 6.0f;
 
-    // ── NİŞAN ALMA KAMERA KAYMASI (Parallax Assist ile uyumlu) ──
-    // Elde yay/arbalet/mızrak gibi nişan alınabilen bir silah varken New Camera'nın
-    // omuz offseti azaltılır; kamera ekranın ortasına doğru "biraz" kayar, böylece
-    // gerçek atış yönü (bkz. ProjectileMixin/ServerLevelMixin) çizilen crosshair'le
-    // (bkz. CrosshairHandler) daha tutarlı hizalanır. 0 = normal omuz pozisyonu,
-    // 1 = tam hedef kayma miktarı (bkz. AIM_ASSIST_SHIFT_STRENGTH).
     private static float aimAssistShift = 0.0f;
     private static final float AIM_ASSIST_SHIFT_STRENGTH = 0.5f; // side offsetin en fazla %50'si kadar merkeze kayar
     private static final float AIM_ASSIST_SHIFT_SMOOTHING = 0.12f; // per-frame lerp faktörü
@@ -86,10 +80,6 @@ public class VirtualCameraHandler {
         Camera camera = event.getCamera();
         float pt = (float) event.getPartialTick();
 
-        // ── HER ZAMAN taze göz pozisyonu ──
-        // camera.getPosition() detached modda bir önceki custom pozisyonu döndürdüğü
-        // için (feedback loop / drift bugu), göz pozisyonunu doğrudan player'dan
-        // hesaplıyoruz. Bu değer metodun geri kalanında da (shoulder/orbit) kullanılıyor.
         double px = Mth.lerp(pt, mc.player.xo, mc.player.getX());
         double py = Mth.lerp(pt, mc.player.yo, mc.player.getY()) + mc.player.getEyeHeight();
         double pz = Mth.lerp(pt, mc.player.zo, mc.player.getZ());
@@ -112,9 +102,6 @@ public class VirtualCameraHandler {
             collisionDistanceState.initialized = false;
             PlayerTransparencyController.reset();
 
-            // ── FPV'de HER ZAMAN detached=false, vanilla self-render culling korunsun ──
-            // (detached=true + neredeyse eyePos'a eşit pozisyon = motor 3rd person sanıp
-            //  kafa modelini render ediyor, kamera "kafanın içine giriyor" hissi veriyordu)
             if (camera instanceof CameraMixinInterface mixinCamera) {
                 mixinCamera.brs$setDetached(false);
             }
@@ -206,8 +193,6 @@ public class VirtualCameraHandler {
             shoulderPitch = camera.getXRot();
         }
 
-        // ── Nişan alma kamera kayması: Parallax Assist açıkken ve elde nişan
-        // alınabilen bir silah varken hedefi 1'e, aksi halde 0'a yumuşakça çeker ──
         boolean aimAssistActive = !LockState.isLocked()
                 && CameraViewConfig.CLIENT.enableParallaxAssist.get()
                 && !currentType.isFirstPerson()
@@ -368,9 +353,7 @@ public class VirtualCameraHandler {
 
         double back = Mth.lerp(smoothProgress, minBack, targetDistance);
         double side = CameraConfig.SHOULDER_OFFSET.get() * smoothProgress;
-        // ── Nişan alma kayması: elde yay/arbalet/mızrak varken kamera ekranın
-        // ortasına doğru "biraz" kayar (side offseti azaltılır), crosshair'in
-        // gerçek atış yönüyle daha tutarlı hizalanması için ──
+        // Nişan alma kayması
         side *= (1.0 - aimAssistShift * AIM_ASSIST_SHIFT_STRENGTH);
         double vert = CameraConfig.HEIGHT_OFFSET.get() * smoothProgress;
 

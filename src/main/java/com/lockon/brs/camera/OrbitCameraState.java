@@ -50,11 +50,6 @@ public class OrbitCameraState {
         transitioning = true;
     }
 
-    /**
-     * Doğrudan hedef moda geçer (toggle gibi çift yönlü değil, tek yönlü).
-     * /ff komutları gibi kesin bir moda geçmek isteyen çağrılar için kullanılır.
-     * Zaten o moddaysa hiçbir şey yapmaz (gereksiz transition tetiklenmez).
-     */
     public static void setMode(CameraMode mode) {
         if (currentMode == mode) return;
         currentMode = mode;

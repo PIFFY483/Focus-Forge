@@ -2,22 +2,6 @@ package com.lockon.brs.camera;
 
 import net.minecraft.util.Mth;
 
-/**
- * ScreenShakeController
- *
- * Trauma tabanlı ekran sarsıntısı.
- * - Power/scale bazlı: az hasar → az sallantı, çok hasar → çok sallantı
- * - Smooth entry: sarsıntı aniden başlamaz, yumuşak girer
- * - Smooth exit: sarsıntı aniden durmaz, yumuşak çıkar
- * - Max 3 saniye: saniyeler toplandığında 3 saniyeyi geçemez
- * - FPS bağımsız
- * - Client-only (server gameplay etkilenmez)
- *
- * Kullanım:
- *   ScreenShakeController.addShake(0.5f, 0.3f);       // Güç + süre
- *   ScreenShakeController.addShakeFromDamage(15.0f);   // Hasardan otomatik
- *   ScreenShakeController.addTrauma(0.6f);             // Direkt trauma (boss slam)
- */
 public class ScreenShakeController {
 
     // ── Çekirdek Durum ──
@@ -84,12 +68,6 @@ public class ScreenShakeController {
         addShake(power, duration);
     }
 
-    /**
-     * Direkt trauma ekle (boss slam, explosion gibi büyük olaylar).
-     * Kısa süre otomatik eklenir.
-     *
-     * @param amount Trauma miktarı (0..1)
-     */
     public static void addTrauma(float amount) {
         targetTrauma = Math.min(targetTrauma + Mth.clamp(amount, 0.0f, 1.0f), MAX_TRAUMA);
         remainingTime = Math.min(remainingTime + 0.35f, MAX_DURATION);
@@ -109,12 +87,6 @@ public class ScreenShakeController {
     //  GÜNCELLEME
     // ══════════════════════════════════════════════════════
 
-    /**
-     * Her render frame'de çağır. FPS bağımsız.
-     *
-     * @param deltaTime Saniye cinsinden geçen süre
-     *                  (HitStop aktifken scaledDeltaSeconds gönderilir)
-     */
     public static void tick(float deltaTime) {
         if (deltaTime <= 0.0f) return;
 

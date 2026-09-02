@@ -2,7 +2,10 @@ package com.lockon.brs.client;
 
 import com.lockon.LockOnMod;
 import com.lockon.brs.camera.OrbitCameraState;
+import com.lockon.brs.camera.SemiOrbitController;
+import com.lockon.brs.config.CameraConfig;
 import com.lockon.camera.ShoulderCamMode;
+import com.lockon.config.CameraViewConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -44,10 +47,23 @@ public class FFCommand {
                                             setOrbit();
                                             return 1;
                                         })))
+                        .then(Commands.literal("semiorbit")
+                                .then(Commands.literal("cam")
+                                        .executes(ctx -> {
+                                            setSemiOrbit();
+                                            return 1;
+                                        })))
+                        .then(Commands.literal("close")
+                                .executes(ctx -> {
+                                    closeAll();
+                                    return 1;
+                                }))
         );
     }
 
     private static void setOld() {
+        // Manuel komut - Semi Orbit'in otomatik kontrolünü iptal et.
+        SemiOrbitController.setEnabled(false);
         // Orbit açıksa önce yumuşak şekilde omuz pozisyonuna çıkış başlat,
         // sonra Old'a geç (aniden kesilmiş bir orbit transition'ı kalmasın).
         if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
@@ -58,6 +74,7 @@ public class FFCommand {
     }
 
     private static void setNew() {
+        SemiOrbitController.setEnabled(false);
         if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
             OrbitCameraState.requestExit();
         }
@@ -66,11 +83,51 @@ public class FFCommand {
     }
 
     private static void setOrbit() {
+        SemiOrbitController.setEnabled(false);
         // Orbit sistemi sadece NEW omuz kamerası modunda render edildiği için
         // (bkz. VirtualCameraHandler), önce NEW moda geçip ardından orbit'i açıyoruz.
         ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
         OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
         notify("Orbit Camera");
+    }
+
+    /**
+     * Semi Orbit: karakter dururken serbest Orbit, yürürken New (omuz) kamerası;
+     * durmaktan harekete geçişte önce karakter orbit'in baktığı yöne döner,
+     * sonra kamera omuz pozisyonuna doğru kayar (bkz. SemiOrbitController).
+     */
+    private static void setSemiOrbit() {
+        ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
+        // Şu anki durumu net bir başlangıç noktasından başlat.
+        if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
+            OrbitCameraState.requestExit();
+        }
+        SemiOrbitController.setEnabled(true);
+        notify("Semi Orbit Camera");
+    }
+
+    /**
+     * "/ff close" - tüm özel kameraları (New/Orbit/Semi Orbit ve Old) kapatır,
+     * saf vanilla görünüme döner. HUD'daki (config ekranındaki) "Camera Type:
+     * Shoulder" ayarı da otomatik olarak "Classic"e çekilir.
+     */
+    private static void closeAll() {
+        SemiOrbitController.setEnabled(false);
+
+        // Orbit'i anında ve tamamen kapat (yumuşak çıkışı beklemeden - "close" anlık olmalı).
+        OrbitCameraState.reset();
+
+        // NEW (BRS) omuz kamerasını kapat.
+        if (CameraConfig.ENABLE_SHOULDER_CAM.get()) {
+            CameraConfig.ENABLE_SHOULDER_CAM.set(false);
+        }
+
+        // OLD (Focus Forge) omuz kamerasını da Classic'e çek.
+        if (CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {
+            CameraViewConfig.ENABLE_SHOULDER_CAM.set(false);
+        }
+
+        notify("Closed (Classic)");
     }
 
     private static void notify(String label) {

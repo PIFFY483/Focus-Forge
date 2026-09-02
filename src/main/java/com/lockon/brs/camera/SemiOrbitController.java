@@ -1,0 +1,127 @@
+package com.lockon.brs.camera;
+
+import com.lockon.brs.lock.LockState;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
+
+public class SemiOrbitController {
+
+    private enum Phase {
+        SHOULDER,   // yürüyorken / orbit kapalı
+        ORBIT_IDLE, // durgun, serbest orbit bakışı
+        TURNING,    // harekete geçildi, karakter orbit yönüne döndürülüyor
+        EXITING     // dönüş bitti, orbit -> omuz kayması sürüyor
+    }
+
+    private static boolean enabled = false;
+    private static Phase phase = Phase.SHOULDER;
+
+    private static float turnCurrentYaw = 0.0f;
+    private static float turnTargetYaw = 0.0f;
+
+    private static final float TURN_DEGREES_PER_SECOND = 420.0f;
+    private static final float TURN_DONE_EPSILON = 0.5f;
+
+    private SemiOrbitController() {
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    public static void setEnabled(boolean value) {
+        enabled = value;
+        reset();
+    }
+
+    public static void reset() {
+        phase = Phase.SHOULDER;
+    }
+
+    /** Karakterin şu an hareket girdisi (yürüme tuşları) basılı mı? */
+    private static boolean isMovementInputActive(Minecraft mc) {
+        if (mc.options == null) return false;
+        return mc.options.keyUp.isDown() || mc.options.keyDown.isDown()
+                || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown();
+    }
+
+    public static void tick(Minecraft mc, float frameDeltaTicks) {
+        if (!enabled) return;
+        if (mc.player == null) return;
+
+        if (LockState.isLocked()) {
+            reset();
+            return;
+        }
+
+        CameraType type = mc.options.getCameraType();
+        if (type.isFirstPerson()) {
+            if (OrbitCameraState.isOrbitActive()) {
+                OrbitCameraState.requestExit();
+            }
+            reset();
+            return;
+        }
+
+        boolean moving = isMovementInputActive(mc);
+
+        switch (phase) {
+            case SHOULDER -> {
+                if (!moving) {
+                    // Durgunluk başladı -> orbit'e gir (mevcut bakış açısından başlat)
+                    OrbitCameraState.initOrbitFromPlayer(mc.player.getYRot(), mc.player.getXRot());
+                    OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
+                    phase = Phase.ORBIT_IDLE;
+                }
+            }
+            case ORBIT_IDLE -> {
+                if (moving) {
+                    // Harekete geçildi -> önce karakteri orbit'in baktığı yöne döndür
+                    turnCurrentYaw = mc.player.getYRot();
+                    turnTargetYaw = OrbitCameraState.getOrbitYaw();
+                    phase = Phase.TURNING;
+                }
+            }
+            case TURNING -> {
+                float diff = Mth.wrapDegrees(turnTargetYaw - turnCurrentYaw);
+                float maxStep = (TURN_DEGREES_PER_SECOND / 20.0f) * frameDeltaTicks; // derece/tick * tick
+                float step = Mth.clamp(diff, -maxStep, maxStep);
+                turnCurrentYaw = Mth.wrapDegrees(turnCurrentYaw + step);
+                forcePlayerYaw(mc.player, turnCurrentYaw);
+
+                if (!moving) {
+                    // Tuş bırakıldı: dönüşü iptal edip serbest orbit'e geri dön
+                    phase = Phase.ORBIT_IDLE;
+                    return;
+                }
+
+                if (Math.abs(diff) <= TURN_DONE_EPSILON) {
+                    // Dönüş tamamlandı -> orbit kamerayı omuz noktasına doğru kaydır
+                    OrbitCameraState.requestExit();
+                    phase = Phase.EXITING;
+                }
+            }
+            case EXITING -> {
+                if (!moving) {
+                    // Kayma bitmeden tekrar durdu: orbit'e geri kay
+                    OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
+                    phase = Phase.ORBIT_IDLE;
+                    return;
+                }
+                if (!OrbitCameraState.isOrbitActive()) {
+                    // Kayma tamamlandı, fareye tam kontrol geri döndü
+                    phase = Phase.SHOULDER;
+                }
+            }
+        }
+    }
+
+    private static void forcePlayerYaw(LocalPlayer player, float yaw) {
+        player.setYRot(yaw);
+        player.yRotO = yaw;
+        player.setYHeadRot(yaw);
+        player.yHeadRotO = yaw;
+    }
+}
