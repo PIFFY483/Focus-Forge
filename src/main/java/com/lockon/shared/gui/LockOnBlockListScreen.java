@@ -55,8 +55,8 @@ public class LockOnBlockListScreen extends Screen {
     protected void init() {
         this.clearWidgets();
 
-        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, Component.literal("Arama"));
-        this.searchBox.setHint(Component.literal("Blok Ara... (minecraft:dirt gibi)"));
+        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, Component.translatable("gui.search"));
+        this.searchBox.setHint(Component.translatable("lockon.list.search_block_hint"));
         this.searchBox.setResponder(this::updateList);
         this.addWidget(this.searchBox);
 
@@ -136,7 +136,7 @@ public class LockOnBlockListScreen extends Screen {
             this.isAdded = isAdded;
 
             Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(blockId));
-            this.blockName = block != null ? block.getName() : Component.literal("Bilinmeyen Blok: " + blockId);
+            this.blockName = block != null ? block.getName() : Component.translatable("lockon.list.unknown_block", blockId);
 
             this.toggleButton = Button.builder(getButtonText(), (button) -> {
                 this.isAdded = !this.isAdded;
@@ -151,7 +151,7 @@ public class LockOnBlockListScreen extends Screen {
         }
 
         private Component getButtonText() {
-            return this.isAdded ? Component.literal("Kaldır") : Component.literal("Ekle");
+            return this.isAdded ? Component.translatable("lockon.list.remove") : Component.translatable("lockon.list.add");
         }
 
         @Override

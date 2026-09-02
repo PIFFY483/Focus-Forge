@@ -4,8 +4,10 @@ import com.lockon.config.CameraViewConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -36,25 +38,43 @@ public abstract class EntityMixin {
         );
 
         Item heldItem = mc.player.getMainHandItem().getItem();
-        boolean isRanged = heldItem instanceof ProjectileWeaponItem;
+
+        // Yay/arbalet/mızrak: mermi namlu/kameradan çıktığı için gerçek
+        // yakınsama (convergence) sağlamak amacıyla yön telafisine ihtiyaç duyar.
+        boolean isRangedWeapon = heldItem instanceof ProjectileWeaponItem
+                || heldItem instanceof TridentItem;
+        // Yerleştirilebilir bloklar: Player.pick() ray'i zaten eyePos'tan
+        // (kaydırılmış omuz kamerasından DEĞİL) başladığı için hiçbir parallax
+        // kayması yaşamaz — telafiye ihtiyacı yoktur. Aşağıdaki telafiyi bloklara
+        // da uygulamak, hedefi merkezden gereksiz yere uzaklaştırıyordu (sola/
+        // arkaya kayma bug'ının kaynağı buydu).
+        boolean isBlock = heldItem instanceof BlockItem;
+        boolean isRanged = isRangedWeapon || isBlock;
 
         /* =========================
-           UZAK / FIRLATILAN SİLAH
+           UZAK / FIRLATILAN SİLAH + BLOK
            ========================= */
         if (isRanged) {
 
-            double shoulderX = CameraViewConfig.SHOULDER_OFFSET_X.get();
+            if (isRangedWeapon) {
+                double shoulderX = CameraViewConfig.SHOULDER_OFFSET_X.get();
 
-            // Sadece SAĞ omuzda telafi uygula
-            if (shoulderX > 0.0) {
-                Vec3 up = new Vec3(0, 1, 0);
-                Vec3 left = cameraDir.cross(up).normalize();
+                // Sadece SAĞ omuzda telafi uygula
+                if (shoulderX > 0.0) {
+                    Vec3 up = new Vec3(0, 1, 0);
+                    Vec3 left = cameraDir.cross(up).normalize();
 
-                double compensationStrength = Math.min(0.12, shoulderX * 0.18);
-                cameraDir = cameraDir.subtract(left.scale(compensationStrength)).normalize();
+                    // Hit noktasını karakterin önüne (merkeze) doğru çeken telafi miktarı.
+                    // Tavan 0.12 -> 0.17 ve çarpan 0.18 -> 0.24 yapıldı: varsayılan
+                    // shoulderX (0.7) değerinde artık tavana daha erken ulaşıp daha
+                    // fazla merkeze doğru düzeltme uyguluyor (daha az "dışarı" sapma).
+                    double compensationStrength = Math.min(0.17, shoulderX * 0.24);
+                    cameraDir = cameraDir.subtract(left.scale(compensationStrength)).normalize();
+                }
             }
 
-
+            // Blok için: ham cameraDir + eyePos = zaten karakter merkezinden
+            // baktığı yön, ekstra düzeltmeye gerek yok -> otomatik olarak ortalı/önde çıkar.
             cir.setReturnValue(cameraDir);
             return;
         }

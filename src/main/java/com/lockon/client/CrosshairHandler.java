@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.TridentItem;
@@ -42,10 +43,10 @@ public class CrosshairHandler {
     }
 
     private static void updateTargetOffset(Minecraft mc) {
-        boolean hasThrowable = isThrowable(mc.player.getMainHandItem().getItem()) ||
-                isThrowable(mc.player.getOffhandItem().getItem());
+        boolean shouldShift = triggersAimAssist(mc.player.getMainHandItem().getItem()) ||
+                triggersAimAssist(mc.player.getOffhandItem().getItem());
 
-        if (!mc.options.getCameraType().isFirstPerson() && hasThrowable) {
+        if (!mc.options.getCameraType().isFirstPerson() && shouldShift) {
             targetOffset = -22.0f;
         } else {
             targetOffset = 0f;
@@ -53,20 +54,29 @@ public class CrosshairHandler {
         currentVisualOffset = Mth.lerp(0.15f, currentVisualOffset, targetOffset);
     }
 
-    private static boolean isThrowable(net.minecraft.world.item.Item item) {
-        return item instanceof BowItem || item instanceof CrossbowItem || item instanceof TridentItem;
+    /**
+     * Bu item elde tutulduğunda parallax-assist crosshair kayması ve New
+     * Camera'nın omuz kaydırması (shoulder shift) tetiklenmeli mi?
+     * - Uzak mesafeli nişan silahları: yay, arbalet, mızrak (trident)
+     * - BlockItem: yerleştirilebilir TÜM bloklar (çim, taş, TNT vs.) — inşaat
+     *   sırasında da savaş moduyla aynı kamera hissi istendiği için dahil edildi.
+     * Yiyecek (elma, ekmek vb.) ve diğer BlockItem OLMAYAN item'lar hariçtir.
+     */
+    private static boolean triggersAimAssist(net.minecraft.world.item.Item item) {
+        return item instanceof BowItem || item instanceof CrossbowItem || item instanceof TridentItem
+                || item instanceof BlockItem;
     }
 
     /**
-     * Oyuncu şu an ana elinde veya boş elinde nişan alınabilen (yay/arbalet/mızrak
-     * gibi) bir silah tutuyor mu? Parallax assist crosshair kayması (bkz.
-     * updateTargetOffset) ile New Camera'nın kamera-kaydırması (bkz.
-     * VirtualCameraHandler#calculateShoulderPosition) aynı koşulu paylaşsın diye
-     * public'e açıldı.
+     * Oyuncu şu an ana elinde veya boş elinde nişan alınabilen (yay/arbalet/mızrak)
+     * ya da yerleştirilebilir bir blok mu tutuyor? Parallax assist crosshair
+     * kayması (bkz. updateTargetOffset) ile New Camera'nın kamera-kaydırması
+     * (bkz. VirtualCameraHandler#calculateShoulderPosition) aynı koşulu
+     * paylaşsın diye public'e açıldı.
      */
     public static boolean isAimableHeld(LivingEntity player) {
-        return isThrowable(player.getMainHandItem().getItem()) ||
-                isThrowable(player.getOffhandItem().getItem());
+        return triggersAimAssist(player.getMainHandItem().getItem()) ||
+                triggersAimAssist(player.getOffhandItem().getItem());
     }
 
     private static void drawPremiumCrosshair(GuiGraphics graphics, float offsetX) {

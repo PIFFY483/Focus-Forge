@@ -3,6 +3,7 @@ package com.lockon.client;
 import com.lockon.lock.LockType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
@@ -27,7 +28,7 @@ public class LockTypeOverlay implements IGuiOverlay {
         if (mc.player == null || mc.options.hideGui) return;
 
         boolean isType1 = LockType.isType1();
-        String text = "Lock Type: " + (isType1 ? "1" : "2");
+        String text = I18n.get("hud.lockon.lock_type", isType1 ? "1" : "2");
         int color = isType1 ? COLOR_TYPE_1 : COLOR_TYPE_2;
 
         // Shoulder Cam göstergesinin (satır 6) hemen altına.

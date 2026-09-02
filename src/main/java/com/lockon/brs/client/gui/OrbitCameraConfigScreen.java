@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
@@ -16,7 +17,7 @@ public class OrbitCameraConfigScreen extends Screen {
     private final Screen parent;
 
     public OrbitCameraConfigScreen(Screen parent) {
-        super(Component.literal("BRS Orbit Kamera Ayarları"));
+        super(Component.translatable("screen.lockon.brs_orbit_camera_settings.title"));
         this.parent = parent;
     }
 
@@ -25,21 +26,21 @@ public class OrbitCameraConfigScreen extends Screen {
         int centerX = this.width / 2;
         int y = 30;
 
-        // ── Orbit Kamera Aç/Kapa ──
+        // ── Orbit Camera On/Off ──
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_ORBIT_CAMERA.get())
                 .create(centerX - 100, y, 200, 20,
-                        Component.literal("Orbit Kamera"),
+                        Component.translatable("camera.config.orbit_camera"),
                         (btn, val) -> {
                             CameraConfig.ENABLE_ORBIT_CAMERA.set(val);
                             CameraRig.loadConfig();
                         }));
         y += 30;
 
-        // ── Orbit Uzaklık ──
+        // ── Orbit Distance ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
-                "Orbit Uzaklık",
+                "camera.config.orbit_distance",
                 CameraConfig.ORBIT_DISTANCE.get(), 2.0, 15.0,
                 val -> {
                     CameraConfig.ORBIT_DISTANCE.set(val);
@@ -47,10 +48,10 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Orbit Yükseklik ──
+        // ── Orbit Height ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
-                "Orbit Yükseklik",
+                "camera.config.orbit_height",
                 CameraConfig.ORBIT_HEIGHT_OFFSET.get(), -2.0, 5.0,
                 val -> {
                     CameraConfig.ORBIT_HEIGHT_OFFSET.set(val);
@@ -58,10 +59,10 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Geçiş Hızı ──
+        // ── Transition Speed ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
-                "Geçiş Hızı",
+                "camera.config.transition_speed",
                 CameraConfig.ORBIT_TRANSITION_SPEED.get(), 0.01, 0.3,
                 val -> {
                     CameraConfig.ORBIT_TRANSITION_SPEED.set(val);
@@ -69,10 +70,10 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Otomatik Dönüş ──
+        // ── Auto Rotate ──
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
-                "Oto Dönüş Hızı",
+                "camera.config.auto_rotate_speed",
                 CameraConfig.ORBIT_AUTO_ROTATE_SPEED.get(), 0.0, 5.0,
                 val -> {
                     CameraConfig.ORBIT_AUTO_ROTATE_SPEED.set(val);
@@ -80,16 +81,16 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 35;
 
-        // ── Bilgi Satırı ──
+        // ── Info Line ──
         this.addRenderableWidget(Button.builder(
-                Component.literal("Tuş: Sol Alt (Oyun içinde değiştirilebilir)"),
+                Component.translatable("camera.config.orbit_key_hint"),
                 btn -> {}
         ).bounds(centerX - 100, y, 200, 20).build());
         y += 25;
 
-        // ── Varsayılanlara Dön ──
+        // ── Reset to Defaults ──
         this.addRenderableWidget(Button.builder(
-                Component.literal("Varsayılanlara Dön"),
+                Component.translatable("gui.lockon.reset_to_defaults"),
                 btn -> {
                     CameraConfig.ENABLE_ORBIT_CAMERA.set(true);
                     CameraConfig.ORBIT_DISTANCE.set(5.0);
@@ -104,7 +105,7 @@ public class OrbitCameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new ConfigSlider(
                 centerX - 100, y, 200, 20,
-                "Fare Hassasiyeti",
+                "camera.config.mouse_sensitivity",
                 CameraConfig.ORBIT_SENSITIVITY.get(), 0.01, 1.0,
                 val -> {
                     CameraConfig.ORBIT_SENSITIVITY.set(val);
@@ -112,9 +113,9 @@ public class OrbitCameraConfigScreen extends Screen {
                 }));
         y += 25;
 
-        // ── Geri ──
+        // ── Back ──
         this.addRenderableWidget(Button.builder(
-                Component.literal("Geri"),
+                Component.translatable("gui.lockon.back"),
                 btn -> this.onClose()
         ).bounds(centerX - 100, y, 200, 20).build());
     }
@@ -138,19 +139,19 @@ public class OrbitCameraConfigScreen extends Screen {
     }
 
     static class ConfigSlider extends AbstractSliderButton {
-        private final String label;
+        private final String labelKey;
         private final double min;
         private final double max;
         private final Consumer<Double> onValueChange;
 
         public ConfigSlider(int x, int y, int w, int h,
-                            String label, double value,
+                            String labelKey, double value,
                             double min, double max,
                             Consumer<Double> onValueChange) {
             super(x, y, w, h,
-                    Component.literal(label + ": " + String.format("%.2f", value)),
+                    Component.literal(I18n.get(labelKey) + ": " + String.format("%.2f", value)),
                     (value - min) / (max - min));
-            this.label = label;
+            this.labelKey = labelKey;
             this.min = min;
             this.max = max;
             this.onValueChange = onValueChange;
@@ -159,7 +160,7 @@ public class OrbitCameraConfigScreen extends Screen {
         @Override
         protected void updateMessage() {
             double val = min + value * (max - min);
-            this.setMessage(Component.literal(label + ": " + String.format("%.2f", val)));
+            this.setMessage(Component.literal(I18n.get(labelKey) + ": " + String.format("%.2f", val)));
         }
 
         @Override

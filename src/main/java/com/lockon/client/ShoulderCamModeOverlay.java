@@ -3,6 +3,7 @@ package com.lockon.client;
 import com.lockon.camera.ShoulderCamMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
@@ -27,7 +28,8 @@ public class ShoulderCamModeOverlay implements IGuiOverlay {
         if (mc.options.getCameraType().isFirstPerson()) return;
 
         boolean isOld = ShoulderCamMode.isOld();
-        String text = "Shoulder Cam: " + (isOld ? "OLD" : "NEW");
+        String modeLabel = I18n.get(isOld ? "hud.lockon.shoulder_cam.old" : "hud.lockon.shoulder_cam.new");
+        String text = I18n.get("hud.lockon.shoulder_cam", modeLabel);
         int color = isOld ? COLOR_OLD : COLOR_NEW;
 
         guiGraphics.drawString(mc.font, text, 6, 6, color, true);

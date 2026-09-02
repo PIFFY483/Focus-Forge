@@ -153,7 +153,7 @@ public class LockOnEntityListScreen extends Screen {
         }
 
         private Component getButtonText() {
-            return parentScreen.currentList.contains(this.entityId) ? Component.literal("Kaldır") : Component.literal("Ekle");
+            return parentScreen.currentList.contains(this.entityId) ? Component.translatable("lockon.list.remove") : Component.translatable("lockon.list.add");
         }
 
         @Override

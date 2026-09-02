@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
@@ -17,7 +18,7 @@ public class DynamicLockDistanceConfigScreen extends Screen {
     private static final int COL_WIDTH = 220;
 
     public DynamicLockDistanceConfigScreen(Screen parent) {
-        super(Component.literal("Dinamik Kamera Mesafesi"));
+        super(Component.translatable("screen.lockon.dynamic_lock_distance.title"));
         this.parent = parent;
     }
 
@@ -30,62 +31,62 @@ public class DynamicLockDistanceConfigScreen extends Screen {
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(LockOnConfig.ENABLE_DYNAMIC_LOCK_DISTANCE.get())
                 .create(x, y, COL_WIDTH, 20,
-                        Component.literal("Dinamik Mesafe"),
+                        Component.translatable("lockon.config.brs.dynamic_distance"),
                         (btn, val) -> LockOnConfig.ENABLE_DYNAMIC_LOCK_DISTANCE.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Çerçeve Payı",
+                "lockon.config.brs.frame_margin",
                 LockOnConfig.FRAME_MARGIN.get(), 0.1, 1.0, 2,
                 val -> LockOnConfig.FRAME_MARGIN.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Min Mesafe",
+                "lockon.config.brs.min_distance",
                 LockOnConfig.MIN_LOCK_CAMERA_DISTANCE.get(), 0.5, 10.0, 1,
                 val -> LockOnConfig.MIN_LOCK_CAMERA_DISTANCE.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Max Mesafe",
+                "lockon.config.brs.max_distance",
                 LockOnConfig.MAX_LOCK_CAMERA_DISTANCE.get(), 2.0, 30.0, 1,
                 val -> LockOnConfig.MAX_LOCK_CAMERA_DISTANCE.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Geçiş Hızı",
+                "camera.config.transition_speed",
                 LockOnConfig.LOCK_DISTANCE_SMOOTH_SPEED.get(), 0.01, 0.5, 2,
                 val -> LockOnConfig.LOCK_DISTANCE_SMOOTH_SPEED.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Maks Adım (blok/tick)",
+                "lockon.config.brs.max_step",
                 LockOnConfig.LOCK_DISTANCE_MAX_STEP_PER_TICK.get(), 0.01, 2.0, 2,
                 val -> LockOnConfig.LOCK_DISTANCE_MAX_STEP_PER_TICK.set(val)));
         y += 30;
 
-        // ── Lock mesafesi artışına/azalışına bağlı Y offset (genel Oto Y Hizalama'dan bağımsız) ──
+        // ── Y offset tied to lock distance increase/decrease (independent from the general Auto Y Align) ──
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(LockOnConfig.ENABLE_LOCK_DISTANCE_Y_OFFSET.get())
                 .create(x, y, COL_WIDTH, 20,
-                        Component.literal("Mesafeye Bağlı Y"),
+                        Component.translatable("lockon.config.brs.distance_based_y"),
                         (btn, val) -> LockOnConfig.ENABLE_LOCK_DISTANCE_Y_OFFSET.set(val)));
         y += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 x, y, COL_WIDTH, 20,
-                "Y Oranı",
+                "lockon.config.brs.y_ratio",
                 LockOnConfig.LOCK_DISTANCE_Y_FACTOR.get(), 0.0, 1.0, 2,
                 val -> LockOnConfig.LOCK_DISTANCE_Y_FACTOR.set(val)));
         y += 35;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Varsayılanlara Dön"),
+                Component.translatable("gui.lockon.reset_to_defaults"),
                 btn -> {
                     LockOnConfig.ENABLE_DYNAMIC_LOCK_DISTANCE.set(true);
                     LockOnConfig.FRAME_MARGIN.set(0.65);
@@ -100,7 +101,7 @@ public class DynamicLockDistanceConfigScreen extends Screen {
         y += 25;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Tamam"),
+                Component.translatable("gui.lockon.ok"),
                 btn -> this.onClose()
         ).bounds(x, y, COL_WIDTH, 20).build());
     }
@@ -123,20 +124,20 @@ public class DynamicLockDistanceConfigScreen extends Screen {
     }
 
     static class ConfigSlider extends AbstractSliderButton {
-        private final String label;
+        private final String labelKey;
         private final double min;
         private final double max;
         private final int decimals;
         private final Consumer<Double> onValueChange;
 
         public ConfigSlider(int x, int y, int w, int h,
-                            String label, double value,
+                            String labelKey, double value,
                             double min, double max, int decimals,
                             Consumer<Double> onValueChange) {
             super(x, y, w, h,
-                    Component.literal(label + ": " + String.format("%." + decimals + "f", value)),
+                    Component.literal(I18n.get(labelKey) + ": " + String.format("%." + decimals + "f", value)),
                     (value - min) / (max - min));
-            this.label = label;
+            this.labelKey = labelKey;
             this.min = min;
             this.max = max;
             this.decimals = decimals;
@@ -146,7 +147,7 @@ public class DynamicLockDistanceConfigScreen extends Screen {
         @Override
         protected void updateMessage() {
             double val = min + value * (max - min);
-            this.setMessage(Component.literal(label + ": " + String.format("%." + decimals + "f", val)));
+            this.setMessage(Component.literal(I18n.get(labelKey) + ": " + String.format("%." + decimals + "f", val)));
         }
 
         @Override

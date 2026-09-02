@@ -70,7 +70,7 @@ public class FFCommand {
             OrbitCameraState.requestExit();
         }
         ShoulderCamMode.set(ShoulderCamMode.Mode.OLD);
-        notify("Old Camera");
+        notify("camera.mode.old");
     }
 
     private static void setNew() {
@@ -79,7 +79,7 @@ public class FFCommand {
             OrbitCameraState.requestExit();
         }
         ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
-        notify("New Camera (Shoulder)");
+        notify("camera.mode.new_shoulder");
     }
 
     private static void setOrbit() {
@@ -88,7 +88,7 @@ public class FFCommand {
         // (bkz. VirtualCameraHandler), önce NEW moda geçip ardından orbit'i açıyoruz.
         ShoulderCamMode.set(ShoulderCamMode.Mode.NEW);
         OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
-        notify("Orbit Camera");
+        notify("camera.mode.orbit");
     }
 
     /**
@@ -103,7 +103,7 @@ public class FFCommand {
             OrbitCameraState.requestExit();
         }
         SemiOrbitController.setEnabled(true);
-        notify("Semi Orbit Camera");
+        notify("camera.mode.semi_orbit");
     }
 
     /**
@@ -127,13 +127,13 @@ public class FFCommand {
             CameraViewConfig.ENABLE_SHOULDER_CAM.set(false);
         }
 
-        notify("Closed (Classic)");
+        notify("camera.mode.closed");
     }
 
-    private static void notify(String label) {
+    private static void notify(String labelKey) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
-            mc.player.displayClientMessage(Component.literal("Camera Mode: " + label), true);
+            mc.player.displayClientMessage(Component.translatable("hud.lockon.camera_mode", Component.translatable(labelKey)), true);
         }
     }
 }

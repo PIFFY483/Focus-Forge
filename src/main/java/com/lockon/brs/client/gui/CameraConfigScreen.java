@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
@@ -19,7 +20,7 @@ public class CameraConfigScreen extends Screen {
     private static final int COL_GAP = 10;
 
     public CameraConfigScreen(Screen parent) {
-        super(Component.literal("BRS Kamera Ayarları"));
+        super(Component.translatable("screen.lockon.brs_camera_settings.title"));
         this.parent = parent;
     }
 
@@ -30,37 +31,37 @@ public class CameraConfigScreen extends Screen {
         int yLeft = 30;
         int yRight = 30;
 
-        // ═══════════════ SOL SÜTUN: Omuz Kamerası Ayarları ═══════════════
+        // ═══════════════ LEFT COLUMN: Shoulder Camera Settings ═══════════════
 
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_SHOULDER_CAM.get())
                 .create(leftX, yLeft, COL_WIDTH, 20,
-                        Component.literal("Omuz Kamerası"),
+                        Component.translatable("camera.config.shoulder_cam"),
                         (btn, val) -> {
                             CameraConfig.ENABLE_SHOULDER_CAM.set(val);
                             CameraRig.loadConfig();
                         }));
         yLeft += 25;
 
-        // ── OTO Y HİZALAMA TOGGLE ──
+        // ── AUTO Y ALIGN TOGGLE ──
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_DYNAMIC_Y_OFFSET.get())
                 .create(leftX, yLeft, COL_WIDTH, 20,
-                        Component.literal("Oto Y Hizalama"),
+                        Component.translatable("camera.config.auto_y_align"),
                         (btn, val) -> CameraConfig.ENABLE_DYNAMIC_Y_OFFSET.set(val)));
         yLeft += 25;
 
-        // ── DİNAMİK Y ORANI SLIDER ──
+        // ── DYNAMIC Y RATIO SLIDER ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Dinamik Y Oranı",
+                "camera.config.dynamic_y_ratio",
                 CameraConfig.DYNAMIC_Y_FACTOR.get(), 0.0, 0.5,
                 val -> CameraConfig.DYNAMIC_Y_FACTOR.set(val)));
         yLeft += 25;
 
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Omuz Offset",
+                "camera.config.shoulder_offset",
                 CameraConfig.SHOULDER_OFFSET.get(), -5.0, 5.0,
                 val -> {
                     CameraConfig.SHOULDER_OFFSET.set(val);
@@ -70,7 +71,7 @@ public class CameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Yükseklik",
+                "camera.config.height",
                 CameraConfig.HEIGHT_OFFSET.get(), -5.0, 5.0,
                 val -> {
                     CameraConfig.HEIGHT_OFFSET.set(val);
@@ -80,7 +81,7 @@ public class CameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Uzaklık",
+                "camera.config.distance",
                 CameraConfig.CAMERA_DISTANCE.get(), 0.5, 5.0,
                 val -> {
                     CameraConfig.CAMERA_DISTANCE.set(val);
@@ -90,40 +91,40 @@ public class CameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Smooth",
+                "camera.config.smooth",
                 CameraConfig.CAMERA_SMOOTHNESS.get(), 0.05, 1.0,
                 val -> CameraConfig.CAMERA_SMOOTHNESS.set(val)));
         yLeft += 25;
 
-        // ── LOCK-ON: KAMERA TAKİP HIZI (souls-like kamera lag'i) ──
+        // ── LOCK-ON: CAMERA FOLLOW SPEED (souls-like camera lag) ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Lock Takip Hızı",
+                "camera.config.lock_follow_speed",
                 CameraConfig.CAMERA_FOLLOW_SPEED.get(), 0.01, 1.0,
                 val -> CameraConfig.CAMERA_FOLLOW_SPEED.set(val)));
         yLeft += 25;
 
-        // ── DUVAR ÇARPIŞMASI GERİ TOPARLANMA HIZI ──
+        // ── WALL COLLISION RECOVERY SPEED ──
         this.addRenderableWidget(new ConfigSlider(
                 leftX, yLeft, COL_WIDTH, 20,
-                "Çarpışma Toparlanma",
+                "camera.config.collision_recovery",
                 CameraConfig.COLLISION_RECOVERY_SPEED.get(), 0.01, 1.0,
                 val -> CameraConfig.COLLISION_RECOVERY_SPEED.set(val)));
         yLeft += 30;
 
-        // ═══════════════ SAĞ SÜTUN: Kamera Geçişi + Alt Ekranlar ═══════════════
+        // ═══════════════ RIGHT COLUMN: Camera Transition + Sub-Screens ═══════════════
 
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.SKIP_FRONT_VIEW.get())
                 .create(rightX, yRight, COL_WIDTH, 20,
-                        Component.literal("TPV Front'u Atla"),
+                        Component.translatable("camera.config.skip_tpv_front"),
                         (btn, val) -> CameraConfig.SKIP_FRONT_VIEW.set(val)));
         yRight += 25;
 
         this.addRenderableWidget(CycleButton
                 .onOffBuilder(CameraConfig.ENABLE_SMOOTH_TRANSITION.get())
                 .create(rightX, yRight, COL_WIDTH, 20,
-                        Component.literal("Smooth Geçiş"),
+                        Component.translatable("camera.config.smooth_transition"),
                         (btn, val) -> {
                             CameraConfig.ENABLE_SMOOTH_TRANSITION.set(val);
                             CameraRig.loadConfig();
@@ -132,7 +133,7 @@ public class CameraConfigScreen extends Screen {
 
         this.addRenderableWidget(new ConfigSlider(
                 rightX, yRight, COL_WIDTH, 20,
-                "Geçiş Hızı",
+                "camera.config.transition_speed",
                 CameraConfig.TRANSITION_SPEED.get(), 0.01, 1.0,
                 val -> {
                     CameraConfig.TRANSITION_SPEED.set(val);
@@ -141,23 +142,23 @@ public class CameraConfigScreen extends Screen {
         yRight += 25;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Lock On Ayarları"),
+                Component.translatable("screen.lockon.brs_lockon_settings.button"),
                 btn -> this.minecraft.setScreen(new LockOnConfigScreen(this))
         ).bounds(rightX, yRight, COL_WIDTH, 20).build());
         yRight += 25;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Orbit Kamera Ayarları"),
+                Component.translatable("screen.lockon.brs_orbit_camera_settings.button"),
                 btn -> this.minecraft.setScreen(new OrbitCameraConfigScreen(this))
         ).bounds(rightX, yRight, COL_WIDTH, 20).build());
         yRight += 30;
 
-        // ═══════════════ ALT ORTAK: Varsayılanlar / Tamam ═══════════════
+        // ═══════════════ BOTTOM (SHARED): Defaults / OK ═══════════════
         int yBottom = Math.max(yLeft, yRight) + 10;
         int centerX = this.width / 2;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Varsayılanlara Dön"),
+                Component.translatable("gui.lockon.reset_to_defaults"),
                 btn -> {
                     CameraConfig.ENABLE_SHOULDER_CAM.set(true);
                     CameraConfig.SHOULDER_OFFSET.set(0.5);
@@ -177,7 +178,7 @@ public class CameraConfigScreen extends Screen {
         yBottom += 25;
 
         this.addRenderableWidget(Button.builder(
-                Component.literal("Tamam"),
+                Component.translatable("gui.lockon.ok"),
                 btn -> this.onClose()
         ).bounds(centerX - 100, yBottom, 200, 20).build());
     }
@@ -201,19 +202,19 @@ public class CameraConfigScreen extends Screen {
     }
 
     static class ConfigSlider extends AbstractSliderButton {
-        private final String label;
+        private final String labelKey;
         private final double min;
         private final double max;
         private final Consumer<Double> onValueChange;
 
         public ConfigSlider(int x, int y, int w, int h,
-                            String label, double value,
+                            String labelKey, double value,
                             double min, double max,
                             Consumer<Double> onValueChange) {
             super(x, y, w, h,
-                    Component.literal(label + ": " + String.format("%.2f", value)),
+                    Component.literal(I18n.get(labelKey) + ": " + String.format("%.2f", value)),
                     (value - min) / (max - min));
-            this.label = label;
+            this.labelKey = labelKey;
             this.min = min;
             this.max = max;
             this.onValueChange = onValueChange;
@@ -222,7 +223,7 @@ public class CameraConfigScreen extends Screen {
         @Override
         protected void updateMessage() {
             double val = min + value * (max - min);
-            this.setMessage(Component.literal(label + ": " + String.format("%.2f", val)));
+            this.setMessage(Component.literal(I18n.get(labelKey) + ": " + String.format("%.2f", val)));
         }
 
         @Override

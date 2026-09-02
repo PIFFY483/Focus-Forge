@@ -152,6 +152,8 @@ public class TargetScanner {
         LocalPlayer player = mc.player;
         if (player == null || !target.isAlive() || target.level() != player.level()) return false;
 
+        refreshCache();
+
         // 1. MESAFE KONTROLÜ (Mesafe aşılırsa kilit her zaman kopar)
         if (player.distanceTo(target) > LockOnConfig.MAX_DISENGAGEMENT_RANGE.get()) return false;
 
@@ -165,8 +167,10 @@ public class TargetScanner {
 
         // 3. GÖRÜŞ HATTI (LoS) KONTROLÜ
         if (LockOnConfig.BREAK_LOCK_ON_LOS_BREAK.get()) {
-            // Minecraft'ın kendi canSee metodunu kullanarak hatayı giderir
-            if (!player.hasLineOfSight(target)) return false;
+            // ÖNEMLİ: player.hasLineOfSight(target) preclusion listesini bilmez,
+            // her katı bloğu engel sayar. Preclusion whitelist'ini de dikkate
+            // alan raycast'i kullanmamız gerekiyor.
+            if (!checkLineOfSightForPreclusion(player, target, LockOnConfig.CAMERA_FOCUS_OFFSET.get())) return false;
         }
 
         return true;

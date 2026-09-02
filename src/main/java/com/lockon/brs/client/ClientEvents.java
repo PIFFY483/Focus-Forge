@@ -85,22 +85,22 @@ public class ClientEvents {
                 // ALT elle basıldıysa Semi Orbit'in otomatik kontrolünü iptal et,
                 // manuel toggle önceliklidir.
                 // 3 adımlı döngü: 1) New (Shoulder)  2) Semi Orbit  3) Orbit  -> tekrar 1)
-                String label;
+                String labelKey;
                 if (SemiOrbitController.isEnabled()) {
                     // 2) Semi Orbit -> 3) Orbit
                     SemiOrbitController.setEnabled(false);
                     OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);
-                    label = "Orbit Camera";
+                    labelKey = "camera.mode.orbit";
                 } else if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
                     // 3) Orbit -> 1) New (Shoulder)
                     OrbitCameraState.requestExit();
-                    label = "New Camera (Shoulder)";
+                    labelKey = "camera.mode.new_shoulder";
                 } else {
                     // 1) New (Shoulder) -> 2) Semi Orbit
                     SemiOrbitController.setEnabled(true);
-                    label = "Semi Orbit Camera";
+                    labelKey = "camera.mode.semi_orbit";
                 }
-                mc.player.displayClientMessage(Component.literal("Camera Mode: " + label), true);
+                mc.player.displayClientMessage(Component.translatable("hud.lockon.camera_mode", Component.translatable(labelKey)), true);
             }
         }
     }
@@ -117,7 +117,11 @@ public class ClientEvents {
                 // Sadece ilgili config yüklendiğinde ilgili kodu çalıştır
                 if (fileName.equals("brs-camera.toml")) {
                     CameraRig.loadConfig();
-                } else if (fileName.equals("brs-lockon.toml")) {
+                } else if (fileName.equals("brs-lockon.toml") || fileName.equals("lockon-shared-lists.toml")) {
+                    // "lockon-shared-lists.toml" -> entity blacklist + blok listeleri artık
+                    // burada tutuluyor (bkz. com.lockon.shared.config.SharedListConfig).
+                    // Bu dosya kaydedildiğinde de cache'i tazelememiz gerekiyor, yoksa
+                    // GUI'den yapılan ekleme/çıkarma oyun içi taramaya hiç yansımıyor.
                     TargetScanner.refreshCache();
                 }
             }
@@ -130,7 +134,7 @@ public class ClientEvents {
 
                 if (fileName.equals("brs-camera.toml")) {
                     CameraRig.loadConfig();
-                } else if (fileName.equals("brs-lockon.toml")) {
+                } else if (fileName.equals("brs-lockon.toml") || fileName.equals("lockon-shared-lists.toml")) {
                     TargetScanner.refreshCache();
                 }
             }

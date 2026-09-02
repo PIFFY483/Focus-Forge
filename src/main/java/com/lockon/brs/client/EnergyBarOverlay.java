@@ -3,6 +3,7 @@ package com.lockon.brs.client;
 import com.lockon.brs.energy.ClientEnergyCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
@@ -68,7 +69,7 @@ public class EnergyBarOverlay implements IGuiOverlay {
 
         // Barın solunda: bize kilitlenmiş düşman varsa kırmızı uyarı
         if (ClientEnergyCache.hasLockedEnemy()) {
-            String enemyText = "! ENEMY";
+            String enemyText = I18n.get("hud.lockon.enemy_warning");
             int enemyY = top + (BAR_HEIGHT - mc.font.lineHeight) / 2;
             int enemyWidth = mc.font.width(enemyText);
             guiGraphics.drawString(mc.font, enemyText, left - enemyWidth - 4, enemyY, COLOR_ENEMY_WARNING, true);

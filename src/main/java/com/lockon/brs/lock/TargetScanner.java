@@ -48,7 +48,9 @@ public class TargetScanner {
         LocalPlayer player = mc.player;
         if (player == null) return null;
 
-        if (!isCacheInitialized) refreshCache();
+        // Her taramada tazele: config reload event'i her senaryoda tetiklenmeyebiliyor,
+        // Type 1 (Focus Forge) tarafı da bunu her çağrıda yapıyor, tutarlılık için aynısı burada da.
+        refreshCache();
 
         double maxDist = LockOnConfig.MAX_LOCK_DISTANCE.get();
         double maxAngle = LockOnConfig.MAX_LOCK_ANGLE.get() + LockOnConfig.MAX_VERTICAL_OFFSET.get();
@@ -93,7 +95,7 @@ public class TargetScanner {
     public static LivingEntity findReacquireTarget(LivingEntity deadTarget) {
         LocalPlayer player = mc.player;
         if (player == null) return null;
-        if (!isCacheInitialized) refreshCache();
+        refreshCache();
 
         final double REACQUIRE_HALF_ANGLE = 90.0; // ±90° = 180° ön alan
         double maxDist = LockOnConfig.MAX_LOCK_DISTANCE.get();
@@ -199,6 +201,8 @@ public class TargetScanner {
     public static boolean isTargetStillValid(LivingEntity target) {
         LocalPlayer player = mc.player;
         if (player == null || !target.isAlive() || target.level() != player.level()) return false;
+
+        refreshCache();
 
         // 1. MESAFE KONTROLÜ
         if (player.distanceTo(target) > LockOnConfig.MAX_DISENGAGEMENT_RANGE.get()) return false;
