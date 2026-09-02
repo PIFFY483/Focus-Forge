@@ -2,6 +2,7 @@ package com.lockon.brs.camera;
 
 import com.lockon.brs.config.CameraConfig;
 import com.lockon.brs.config.LockOnConfig;
+import com.lockon.config.CameraViewConfig;
 import com.lockon.brs.lock.LockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -90,7 +91,7 @@ public class CameraStateManager {
             float entityHeight = lockedTarget.getBbHeight();
 
             if (entityHeight > 2.0f) {
-                finalTargetY = baseTargetY + (entityHeight * LockOnConfig.DYNAMIC_FOCUS_HEIGHT_RATIO.get());
+                finalTargetY = baseTargetY + (entityHeight * CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.get());
             } else {
                 finalTargetY = baseTargetY + lockedTarget.getEyeHeight();
             }

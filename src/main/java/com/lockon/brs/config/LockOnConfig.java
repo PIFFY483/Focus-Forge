@@ -17,7 +17,10 @@ public class LockOnConfig {
     public static final ForgeConfigSpec.DoubleValue MAX_LOCK_ANGLE;
     public static final ForgeConfigSpec.DoubleValue MAX_VERTICAL_OFFSET;
     public static final ForgeConfigSpec.DoubleValue CAMERA_FOCUS_OFFSET;
-    public static final ForgeConfigSpec.DoubleValue DYNAMIC_FOCUS_HEIGHT_RATIO;
+    // Dinamik odak yukseklik orani artik ayri bir BRS ayari degil; Focus Forge'un
+    // kendi lock sisteminin (TYPE_1) "o" tusuyla acilan kamera ayarlari HUD'undaki
+    // ortak degeri kullaniliyor, boylece iki lock type de ayni yuzde ile buyuk
+    // moblara odaklaniyor. Bkz. com.lockon.config.CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD
     public static final ForgeConfigSpec.DoubleValue LOCK_SPEED;
     public static final ForgeConfigSpec.DoubleValue MAX_SMOOTHING_FACTOR;
     public static final ForgeConfigSpec.DoubleValue UNLOCK_COOLDOWN_SECONDS;
@@ -67,7 +70,6 @@ public class LockOnConfig {
         MAX_LOCK_ANGLE = CLIENT.maxLockAngle;
         MAX_VERTICAL_OFFSET = CLIENT.maxVerticalOffset;
         CAMERA_FOCUS_OFFSET = CLIENT.cameraFocusOffset;
-        DYNAMIC_FOCUS_HEIGHT_RATIO = CLIENT.dynamicFocusHeightRatio;
         LOCK_SPEED = CLIENT.lockSpeed;
         MAX_SMOOTHING_FACTOR = CLIENT.maxSmoothingFactor;
         UNLOCK_COOLDOWN_SECONDS = CLIENT.unlockCooldownSeconds;
@@ -100,7 +102,6 @@ public class LockOnConfig {
         public final ForgeConfigSpec.DoubleValue maxLockAngle;
         public final ForgeConfigSpec.DoubleValue maxVerticalOffset;
         public final ForgeConfigSpec.DoubleValue cameraFocusOffset;
-        public final ForgeConfigSpec.DoubleValue dynamicFocusHeightRatio;
         public final ForgeConfigSpec.DoubleValue lockSpeed;
         public final ForgeConfigSpec.DoubleValue maxSmoothingFactor;
         public final ForgeConfigSpec.DoubleValue unlockCooldownSeconds;
@@ -148,10 +149,6 @@ public class LockOnConfig {
             this.cameraFocusOffset = builder
                     .comment("Kamera odak noktası dikey offset")
                     .defineInRange("cameraFocusOffset", 0.0, -5.0, 5.0);
-
-            this.dynamicFocusHeightRatio = builder
-                    .comment("2 bloktan büyük moblar için odak yüksekliği oranı")
-                    .defineInRange("dynamicFocusHeightRatio", 0.7, 0.1, 1.0);
 
             this.lockSpeed = builder
                     .comment("Kilit hızı")

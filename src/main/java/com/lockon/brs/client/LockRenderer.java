@@ -1,6 +1,7 @@
 package com.lockon.brs.client;
 
 import com.lockon.brs.config.LockOnConfig;
+import com.lockon.config.CameraViewConfig;
 import com.lockon.brs.client.gui.LockOnConfigScreen;
 import com.lockon.brs.lock.LockState;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -55,7 +56,7 @@ public class LockRenderer {
         float entityHeight = target.getBbHeight();
 
         if (entityHeight > 2.0f) {
-            finalTargetY = baseTargetY + (entityHeight * LockOnConfig.DYNAMIC_FOCUS_HEIGHT_RATIO.get());
+            finalTargetY = baseTargetY + (entityHeight * CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.get());
         } else {
             finalTargetY = baseTargetY + target.getEyeHeight();
         }

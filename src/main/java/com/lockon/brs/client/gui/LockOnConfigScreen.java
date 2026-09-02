@@ -1,6 +1,7 @@
 package com.lockon.brs.client.gui;
 
 import com.lockon.brs.config.LockOnConfig;
+import com.lockon.config.CameraViewConfig;
 import com.lockon.shared.gui.LockOnBlockListScreen;
 import com.lockon.shared.gui.LockOnEntityListScreen;
 import net.minecraft.client.Minecraft;
@@ -76,7 +77,7 @@ public class LockOnConfigScreen extends Screen {
         this.addRenderableWidget(new FloatSlider(xCol3, y, BUTTON_WIDTH, "lockon.config.brs.focus_offset",
                 LockOnConfig.CAMERA_FOCUS_OFFSET.get(), -5.0, 5.0, 2, v -> LockOnConfig.CAMERA_FOCUS_OFFSET.set(v)));
         this.addRenderableWidget(new FloatSlider(xCol4, y, BUTTON_WIDTH, "lockon.config.brs.focus_ratio",
-                LockOnConfig.DYNAMIC_FOCUS_HEIGHT_RATIO.get(), 0.1, 1.0, 2, v -> LockOnConfig.DYNAMIC_FOCUS_HEIGHT_RATIO.set(v)));
+                CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.get(), 0.1, 1.0, 2, v -> CameraViewConfig.DYNAMIC_FOCUS_THRESHOLD.set(v)));
         y += ROW_HEIGHT;
 
         // Row 3
