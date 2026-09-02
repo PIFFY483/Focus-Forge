@@ -159,6 +159,9 @@ public class LockTickHandler {
                 // Mevcut hedef hala geçerli değilse
                 if (currentTarget == null || !currentTarget.isAlive() || !TargetScanner.isTargetStillValid(currentTarget)) {
                     LockState.unlock();
+                    CameraStateManager.onUnlock(mc);
+                    lastUnlockTime = System.currentTimeMillis();
+                    isCurrentlyLocked = false;
                 }
             }
         }
@@ -167,6 +170,8 @@ public class LockTickHandler {
             LivingEntity target = LockState.getTarget();
             if (target == null) {
                 LockState.unlock();
+                CameraStateManager.onUnlock(mc);
+                lastUnlockTime = System.currentTimeMillis();
                 return;
             }
 
