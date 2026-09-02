@@ -68,14 +68,28 @@ public class ClientEvents {
 
         if (KeyBindings.ORBIT_TOGGLE_KEY.consumeClick()) {
             if (mc.screen == null && mc.player != null) {
-                if (com.lockon.camera.ShoulderCamMode.isOld()) {
-                    // OLD moddayken ALT artık devre dışı - OLDdan çıkış sadece komutla olur.
-                    return;
+                // /ff close sonrası ENABLE_SHOULDER_CAM kalıcı false kalabiliyor;
+                // ALT ile döngüye her girişte kamera sistemini tekrar aktive et
+                // (aksi halde mod HUD'da değişir ama gerçek kamera klasik TPV'de takılı kalır).
+                if (!com.lockon.brs.config.CameraConfig.ENABLE_SHOULDER_CAM.get()) {
+                    com.lockon.brs.config.CameraConfig.ENABLE_SHOULDER_CAM.set(true);
+                }
+                if (!com.lockon.config.CameraViewConfig.ENABLE_SHOULDER_CAM.get()) {
+                    com.lockon.config.CameraViewConfig.ENABLE_SHOULDER_CAM.set(true);
                 }
 
                 // 3 adımlı döngü: 1) New (Shoulder)  2) Semi Orbit  3) Orbit  -> tekrar 1)
                 String labelKey;
-                if (SemiOrbitController.isEnabled()) {
+                if (com.lockon.camera.ShoulderCamMode.isOld()) {
+                    // OLD (klasik) moddayken ALT artık kilitli tuş değil:
+                    // doğrudan NEW moda geçip döngüyü 1. adımdan (Shoulder) başlatıyoruz.
+                    com.lockon.camera.ShoulderCamMode.set(com.lockon.camera.ShoulderCamMode.Mode.NEW);
+                    SemiOrbitController.setEnabled(false);
+                    if (OrbitCameraState.getMode() == OrbitCameraState.CameraMode.ORBIT) {
+                        OrbitCameraState.requestExit();
+                    }
+                    labelKey = "camera.mode.new_shoulder";
+                } else if (SemiOrbitController.isEnabled()) {
                     // 2) Semi Orbit -> 3) Orbit
                     SemiOrbitController.setEnabled(false);
                     OrbitCameraState.setMode(OrbitCameraState.CameraMode.ORBIT);

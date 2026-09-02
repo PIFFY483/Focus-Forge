@@ -10,11 +10,16 @@ public class OrbitCameraState {
     }
 
     private static CameraMode currentMode = CameraMode.SHOULDER;
-    private static float transitionProgress = 0.0f; // 0 = omuz, 1 = orbit
+
+    private static float transitionProgress = 0.0f;
+
     private static boolean transitioning = false;
 
     private static float orbitYaw = 0.0f;
     private static float orbitPitch = 15.0f;
+
+    private OrbitCameraState() {
+    }
 
     public static CameraMode getMode() {
         return currentMode;
@@ -24,8 +29,20 @@ public class OrbitCameraState {
         return currentMode == CameraMode.ORBIT || transitionProgress > 0.001f;
     }
 
+    public static boolean isTransitioning() {
+        return transitioning;
+    }
+
     public static boolean isFullyOrbit() {
-        return currentMode == CameraMode.ORBIT && transitionProgress >= 0.999f;
+        return currentMode == CameraMode.ORBIT
+                && transitionProgress >= 0.999f
+                && !transitioning;
+    }
+
+    public static boolean isFullyShoulder() {
+        return currentMode == CameraMode.SHOULDER
+                && transitionProgress <= 0.001f
+                && !transitioning;
     }
 
     public static float getTransitionProgress() {
@@ -46,60 +63,118 @@ public class OrbitCameraState {
     }
 
     public static void toggle() {
-        currentMode = (currentMode == CameraMode.SHOULDER) ? CameraMode.ORBIT : CameraMode.SHOULDER;
-        transitioning = true;
+        if (currentMode == CameraMode.SHOULDER) {
+            setMode(CameraMode.ORBIT);
+        } else {
+            requestExit();
+        }
     }
 
     public static void setMode(CameraMode mode) {
-        if (currentMode == mode) return;
+
+        if (currentMode == mode && !transitioning) {
+            return;
+        }
+
         currentMode = mode;
         transitioning = true;
     }
 
     public static void requestExit() {
+
+        if (currentMode == CameraMode.SHOULDER
+                && !transitioning
+                && transitionProgress <= 0.001f) {
+            return;
+        }
+
         currentMode = CameraMode.SHOULDER;
         transitioning = true;
     }
 
     public static void initOrbitFromPlayer(float playerYaw, float playerPitch) {
         orbitYaw = playerYaw;
-        orbitPitch = Mth.clamp(-playerPitch * 0.5f + 10.0f, -60.0f, 75.0f);
+        orbitPitch = Mth.clamp(
+                -playerPitch * 0.5f + 10.0f,
+                -60.0f,
+                75.0f
+        );
     }
 
-    public static void updateTransition(float frameDeltaTicks, float transitionSpeed) {
-        if (!transitioning) return;
+    public static void updateTransition(
+            float frameDeltaTicks,
+            float transitionSpeed
+    ) {
+        if (!transitioning) {
+            return;
+        }
 
         float step = transitionSpeed * frameDeltaTicks;
 
         if (currentMode == CameraMode.ORBIT) {
-            transitionProgress = Math.min(1.0f, transitionProgress + step);
+
+            transitionProgress = Math.min(
+                    1.0f,
+                    transitionProgress + step
+            );
+
         } else {
-            transitionProgress = Math.max(0.0f, transitionProgress - step);
+
+            transitionProgress = Math.max(
+                    0.0f,
+                    transitionProgress - step
+            );
         }
 
-        float target = (currentMode == CameraMode.ORBIT) ? 1.0f : 0.0f;
+        float target =
+                currentMode == CameraMode.ORBIT
+                        ? 1.0f
+                        : 0.0f;
+
         if (Math.abs(transitionProgress - target) < 0.001f) {
+
             transitionProgress = target;
             transitioning = false;
         }
     }
 
-    public static void applyMouseDelta(double dx, double dy, double sensitivity) {
-        float factor = (float)(sensitivity * 0.15);
-        orbitYaw = Mth.wrapDegrees(orbitYaw + (float)(dx * factor));
-        orbitPitch = Mth.clamp(orbitPitch + (float)(dy * factor), -60.0f, 75.0f);
+    public static void applyMouseDelta(
+            double dx,
+            double dy,
+            double sensitivity
+    ) {
+        float factor = (float) (sensitivity * 0.15);
+
+        orbitYaw = Mth.wrapDegrees(
+                orbitYaw + (float) (dx * factor)
+        );
+
+        orbitPitch = Mth.clamp(
+                orbitPitch + (float) (dy * factor),
+                -60.0f,
+                75.0f
+        );
     }
 
-    public static void updateAutoRotate(float frameDeltaTicks, float speed) {
+    public static void updateAutoRotate(
+            float frameDeltaTicks,
+            float speed
+    ) {
         if (speed > 0.0f && isFullyOrbit()) {
-            orbitYaw = Mth.wrapDegrees(orbitYaw + speed * frameDeltaTicks);
+
+            orbitYaw = Mth.wrapDegrees(
+                    orbitYaw + speed * frameDeltaTicks
+            );
         }
     }
 
     public static void reset() {
+
         currentMode = CameraMode.SHOULDER;
+
         transitionProgress = 0.0f;
         transitioning = false;
+
         orbitYaw = 0.0f;
         orbitPitch = 15.0f;
     }
